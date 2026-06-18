@@ -35,4 +35,7 @@ tmp/
 temp/
 output/
 node_modules/
-.agents/
+.agents/*
+!.agents/skills/
+.agents/skills/*
+!.agents/skills/.antigravity-install-manifest.json
