@@ -1,20 +1,31 @@
-# Estado Atual do Projeto: Pousada
+# Estado Atual do Projeto: Pousada da Nita
 
 ## O que já foi feito (Concluído)
 - **Arquitetura Base**: Configuração da estrutura de 3 camadas (`directives/` e `execution/`).
 - **Agentes e Automação**:
-  - Download das skills da arquitetura base.
-  - Clone e instalação do repositório de skills externas (`kevinbadi/ai-os-skills`) para `.agents/skills/`.
   - Configuração do manifesto do sistema (`AGENTS.md`, `README.md`).
 - **Integração ClickUp**:
   - Scripts criados para ler, avançar status e atualizar tarefas no ClickUp.
-  - Implementação de script para organizar tarefas avulsas como subtarefas dentro das Sprints correspondentes.
-  - Criação da diretriz `protocolo_clickup.md` que obriga a validação de tarefas ("in review", "testing", etc.) com adição de evidências e **nunca** concluí-las sem a aprovação do usuário.
+  - Criação da diretriz `protocolo_clickup.md` para controle de fluxo e Sprints.
+- **Banco de Dados (Supabase)**:
+  - Criação da tabela `hospedes` com políticas de segurança RLS (`schema.sql`).
+  - Container Docker do Supabase inicializado localmente e credenciais capturadas.
+  - Scripts CLI em Python (`adicionar_hospede.py`, `listar_hospedes.py`, `buscar_hospedes_por_quarto.py`) com validação de CPF e log de auditoria.
+- **Frontend Web**:
+  - Criado o diretório `frontend/` com `index.html`, `styles.css` e `app.js`.
+  - Interface Premium usando Glassmorphism e Vanilla CSS.
+  - Conexão direta com Supabase-js usando as credenciais do ambiente local.
+  - Dashboard funcional para listar, adicionar e pesquisar hóspedes.
 
 ## Estado Atual do Repositório (Onde estamos)
-- Atualmente, o repositório contém apenas as configurações de automação, documentação, e as ferramentas dos agentes de IA.
-- **Nenhum código fonte de aplicação (Frontend/Backend) foi criado ainda.**
+- A infraestrutura de back-end (Supabase) e a interface de front-end (HTML/JS) estão integradas e operacionais para a Sprint 1.
 
 ## O que está sendo feito / Próximos Passos
-- **Sprint 1**: Setup inicial do projeto.
-  - *Status*: Aguardando definição da stack tecnológica (ex: Next.js, Node.js, Python, banco de dados, etc.) para criar a base do código da aplicação.
+- **Sprint 2**: Implementação de sistema de pagamentos. *(Concluído)*
+  - Criada tabela `pagamentos` com migração no Supabase.
+  - Criado modal de "Lançar Pagamento" no frontend.
+  - Atualização automática do status do hóspede para "Pago".
+
+- **Sprint 3**: Relatórios Financeiros (Dashboard) *(Concluído)*
+  - Incluídos 3 cards no topo da página: Faturamento Total, Hóspedes Ativos, Pagamentos Pendentes.
+  - Integração via `app.js` para recálculo automático em tempo real sempre que um pagamento é feito.
