@@ -17,40 +17,52 @@ supabase: Client = create_client(SUPABASE_URL, ANON_KEY)
 def test_overbooking():
     print("Iniciando Teste de Overbooking (QA Skills)...")
     
-    # Payload 1: Valido
+    # 1. Inserir Hóspede (CRM)
+    payload_hospede = {
+        "nome_completo": "Hóspede QA Overbooking",
+        "cpf": "999.999.999-99",
+        "telefone": "11999999999"
+    }
+    
+    try:
+        print("-> Inserindo Hóspede (CRM)...")
+        res_h = supabase.table("hospedes").insert(payload_hospede).execute()
+        hospede_id = res_h.data[0]['id']
+        print(f"   [SUCESSO] Hóspede inserido (ID: {hospede_id}).")
+    except Exception as e:
+        print(f"   [FALHA INESPERADA] Não foi possível inserir Hóspede: {e}")
+        sys.exit(1)
+
+    # Payload 1: Reserva Válida
     payload_1 = {
-        "nome_completo": "Hóspede Teste QA 1",
-        "cpf": "111.111.111-11",
-        "telefone": "11999999999",
+        "hospede_id": hospede_id,
+        "numero_quarto": "999",
         "data_checkin": "2026-10-01",
         "data_checkout": "2026-10-05",
-        "numero_quarto": 999,
-        "status_pagamento": "pendente"
+        "status": "pendente"
     }
 
     try:
-        print(f"-> Inserindo Hospede 1 (Quarto 999, 01/10 a 05/10)...")
-        res1 = supabase.table("hospedes").insert(payload_1).execute()
-        print("   [SUCESSO] Hóspede 1 inserido.")
+        print(f"-> Inserindo Reserva 1 (Quarto 999, 01/10 a 05/10)...")
+        res1 = supabase.table("reservas").insert(payload_1).execute()
+        print("   [SUCESSO] Reserva 1 inserida.")
     except Exception as e:
-        print(f"   [FALHA INESPERADA] Não foi possível inserir Hóspede 1: {e}")
+        print(f"   [FALHA INESPERADA] Não foi possível inserir Reserva 1: {e}")
         sys.exit(1)
 
     # Payload 2: Conflito
     payload_2 = {
-        "nome_completo": "Hóspede Teste QA 2",
-        "cpf": "222.222.222-22",
-        "telefone": "11888888888",
+        "hospede_id": hospede_id,
+        "numero_quarto": "999",
         "data_checkin": "2026-10-03",
         "data_checkout": "2026-10-07",
-        "numero_quarto": 999,
-        "status_pagamento": "pendente"
+        "status": "pendente"
     }
 
     try:
-        print(f"-> Inserindo Hospede 2 (Quarto 999, 03/10 a 07/10)... O esperado é DAR ERRO!")
-        res2 = supabase.table("hospedes").insert(payload_2).execute()
-        print("   [ERRO GRAVE QA] O Hóspede 2 foi inserido! Overbooking NÃO FOI evitado!")
+        print(f"-> Inserindo Reserva 2 (Quarto 999, 03/10 a 07/10)... O esperado é DAR ERRO!")
+        res2 = supabase.table("reservas").insert(payload_2).execute()
+        print("   [ERRO GRAVE QA] A Reserva 2 foi inserida! Overbooking NÃO FOI evitado!")
         sys.exit(1)
     except Exception as e:
         if "Overbooking" in str(e):
@@ -60,7 +72,7 @@ def test_overbooking():
             print(f"   [ERRO INESPERADO] Uma exceção foi lançada, mas não foi de Overbooking: {e}")
             sys.exit(1)
             
-    print("\n✅ TESTE CONCLUÍDO: O sistema de prevenção de Overbooking está robusto e ativo!")
+    print("\n✅ TESTE CONCLUÍDO: O sistema de prevenção de Overbooking está robusto e ativo na tabela de reservas!")
 
 if __name__ == "__main__":
     test_overbooking()
