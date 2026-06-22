@@ -25,6 +25,13 @@ document.addEventListener('DOMContentLoaded', function() {
   const closeModalBtn = document.getElementById('closeModal');
   const cancelModalBtn = document.getElementById('cancelModal');
   const addForm = document.getElementById('addForm');
+  
+  const inputCheckin = document.getElementById('checkin');
+  const inputCheckout = document.getElementById('checkout');
+  const priceBreakdown = document.getElementById('priceBreakdown');
+  const calcNightsLabel = document.getElementById('calcNightsLabel');
+  const calcNightsTotal = document.getElementById('calcNightsTotal');
+  const calcGrandTotal = document.getElementById('calcGrandTotal');
 
   const payModal = document.getElementById('payModal');
   const closePayModalBtn = document.getElementById('closePayModal');
@@ -163,7 +170,57 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // --- Modals ---
   function openAddModal() { addModal.classList.add('active'); }
-  function closeAddModal() { addModal.classList.remove('active'); addForm.reset(); }
+  function closeAddModal() { 
+    addModal.classList.remove('active'); 
+    addForm.reset(); 
+    if(priceBreakdown) priceBreakdown.style.display = 'none';
+  }
+
+  function updatePriceBreakdown() {
+    if (!inputCheckin || !inputCheckout || !priceBreakdown) return;
+    
+    if (!inputCheckin.value || !inputCheckout.value) {
+      priceBreakdown.style.display = 'none';
+      return;
+    }
+
+    const dIn = new Date(inputCheckin.value + "T00:00:00");
+    const dOut = new Date(inputCheckout.value + "T00:00:00");
+    
+    if (dOut <= dIn) {
+      priceBreakdown.style.display = 'none';
+      return;
+    }
+    
+    const diffTime = Math.abs(dOut - dIn);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    const quartoSelect = document.getElementById('quarto');
+    const qValue = quartoSelect ? parseInt(quartoSelect.value) : 0;
+    
+    let valorDiaria = 0;
+    if (qValue === 1 || qValue === 2) valorDiaria = 60;
+    else if (qValue === 3 || qValue === 4) valorDiaria = 90;
+    else if (qValue === 5 || qValue === 6) valorDiaria = 100;
+    else if (qValue === 7 || qValue === 8) valorDiaria = 160;
+    else if (qValue === 9 || qValue === 10) valorDiaria = 140;
+    else if (qValue === 11 || qValue === 12) valorDiaria = 210;
+    else valorDiaria = 0;
+
+    const totalDiarias = valorDiaria * diffDays;
+    const total = totalDiarias;
+    
+    if (calcNightsLabel) calcNightsLabel.textContent = `R$ ${valorDiaria.toFixed(2).replace('.', ',')} x ${diffDays} noites`;
+    if (calcNightsTotal) calcNightsTotal.textContent = `R$ ${totalDiarias.toFixed(2).replace('.', ',')}`;
+    if (calcGrandTotal) calcGrandTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+    
+    priceBreakdown.style.display = valorDiaria > 0 ? 'block' : 'none';
+  }
+
+  if (inputCheckin) inputCheckin.addEventListener('change', updatePriceBreakdown);
+  if (inputCheckout) inputCheckout.addEventListener('change', updatePriceBreakdown);
+  const quartoSelectGlobal = document.getElementById('quarto');
+  if (quartoSelectGlobal) quartoSelectGlobal.addEventListener('change', updatePriceBreakdown);
 
   window.openPayModal = function(id, name, room) {
     payHospedeId.value = id;
@@ -325,6 +382,16 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   }
 
+  const filterBtns = document.querySelectorAll('#paymentFilters button');
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', function() {
+      filterBtns.forEach(b => b.classList.remove('active'));
+      this.classList.add('active');
+      currentPaymentFilter = this.getAttribute('data-filter');
+      renderPagamentos();
+    });
+  });
+
   // --- Data & Render ---
   let allHospedes = [];
   let allReservas = [];
@@ -450,7 +517,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let filtered = allPagamentos;
     if(currentPaymentFilter === 'pendentes') {
       filtered = allPagamentos.filter(p => p.metodo_pagamento === 'pendente' || p.status === 'pendente');
-    } else if(currentPaymentFilter === 'pagos') {
+    } else if(currentPaymentFilter === 'recebidos') {
       filtered = allPagamentos.filter(p => p.metodo_pagamento !== 'pendente' && p.status !== 'pendente');
     }
 
@@ -506,6 +573,21 @@ document.addEventListener('DOMContentLoaded', function() {
     if (document.getElementById('pendingCount')) {
       document.getElementById('pendingCount').textContent = pendingCount;
     }
+
+    // DRE Simplificado
+    const dreReceitaTotal = document.getElementById('dreReceitaTotal');
+    const dreReceitaRecebida = document.getElementById('dreReceitaRecebida');
+    const dreInadimplencia = document.getElementById('dreInadimplencia');
+    const dreTicketMedio = document.getElementById('dreTicketMedio');
+
+    const receitaTotal = totalPaid + totalPending;
+    const qtdReservas = allReservas.length;
+    const ticketMedio = qtdReservas > 0 ? receitaTotal / qtdReservas : 0;
+
+    if(dreReceitaTotal) dreReceitaTotal.textContent = formatCurrency(receitaTotal);
+    if(dreReceitaRecebida) dreReceitaRecebida.textContent = formatCurrency(totalPaid);
+    if(dreInadimplencia) dreInadimplencia.textContent = formatCurrency(totalPending);
+    if(dreTicketMedio) dreTicketMedio.textContent = formatCurrency(ticketMedio);
 
     renderCharts(totalPaid, totalPending);
   }
@@ -762,11 +844,36 @@ document.addEventListener('DOMContentLoaded', function() {
         status: 'pendente'
       };
 
+      const dInDate = new Date(payloadCheckin + "T00:00:00");
+      const dOutDate = new Date(payloadCheckout + "T00:00:00");
+      const diffTime = Math.abs(dOutDate - dInDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      const qValue = parseInt(payloadQuarto);
+      let valorDiaria = 0;
+      if (qValue === 1 || qValue === 2) valorDiaria = 60;
+      else if (qValue === 3 || qValue === 4) valorDiaria = 90;
+      else if (qValue === 5 || qValue === 6) valorDiaria = 100;
+      else if (qValue === 7 || qValue === 8) valorDiaria = 160;
+      else if (qValue === 9 || qValue === 10) valorDiaria = 140;
+      else if (qValue === 11 || qValue === 12) valorDiaria = 210;
+      else valorDiaria = 0;
+
+      const totalReserva = valorDiaria * diffDays;
+
       const { error: errRes } = await supabase.from('reservas').insert([payloadReserva]);
       if (errRes) {
         if(errRes.message.includes('Overbooking')) throw new Error('Quarto indisponível neste período.');
         throw errRes;
       }
+
+      const { error: errPay } = await supabase.from('pagamentos').insert([{
+        hospede_id: hospede_id,
+        valor: totalReserva,
+        metodo_pagamento: 'pendente',
+        status: 'pendente'
+      }]);
+      if (errPay) throw errPay;
 
       showToast('Reserva criada com sucesso!');
       closeAddModal();

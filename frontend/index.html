@@ -281,8 +281,8 @@
           <h2>Histórico Financeiro</h2>
           <div class="filter-group" id="paymentFilters" style="display:flex; gap:0.5rem;">
             <button class="btn-sm-outline active" data-filter="all">Todos</button>
+            <button class="btn-sm-outline" data-filter="recebidos">Recebidos</button>
             <button class="btn-sm-outline" data-filter="pendentes">Pendentes</button>
-            <button class="btn-sm-outline" data-filter="pagos">Pagos</button>
           </div>
         </div>
         <div class="table-card">
@@ -317,23 +317,30 @@
       <div class="metrics-grid">
         <div class="metric-card">
           <div class="metric-info">
-            <h3>DRE (Demonstrativo)</h3>
-            <p>R$ 0,00</p>
-            <span class="metric-subtitle">Projeção atual</span>
+            <h3>Receita Total</h3>
+            <p id="dreReceitaTotal">R$ 0,00</p>
+            <span class="metric-subtitle">Projeção (Pago + Pendente)</span>
           </div>
         </div>
         <div class="metric-card cyan-glow">
           <div class="metric-info">
-            <h3>Fluxo de Caixa</h3>
-            <p>R$ 0,00</p>
-            <span class="metric-subtitle success">Caixa do mês</span>
+            <h3>Receita Recebida</h3>
+            <p id="dreReceitaRecebida">R$ 0,00</p>
+            <span class="metric-subtitle success">Caixa Realizado</span>
           </div>
         </div>
-        <div class="metric-card">
+        <div class="metric-card amber-glow">
           <div class="metric-info">
-            <h3>Taxa de Ocupação</h3>
-            <p>--%</p>
-            <span class="metric-subtitle">Dos 12 quartos</span>
+            <h3>Inadimplência</h3>
+            <p id="dreInadimplencia">R$ 0,00</p>
+            <span class="metric-subtitle pending">Pagamentos Pendentes</span>
+          </div>
+        </div>
+        <div class="metric-card blue-glow">
+          <div class="metric-info">
+            <h3>Ticket Médio</h3>
+            <p id="dreTicketMedio">R$ 0,00</p>
+            <span class="metric-subtitle">Por reserva</span>
           </div>
         </div>
       </div>
@@ -403,6 +410,7 @@
         <button type="button" class="close-btn" id="closeModal">&times;</button>
       </div>
       <form id="addForm">
+        <!-- Personal Info -->
         <div class="form-row">
           <div class="form-group" style="flex: 2;">
             <label>Nome completo</label>
@@ -418,41 +426,67 @@
             <label>Telefone</label>
             <input type="text" id="telefone" placeholder="(11) 99999-9999">
           </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
+          <div class="form-group" style="flex: 1;">
             <label>Quarto</label>
             <select id="quarto" required>
-              <option value="">Selecione o quarto</option>
-              <option value="1">1</option>
-              <option value="2">2</option>
-              <option value="3">3</option>
-              <option value="4">4</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-              <option value="9">9</option>
-              <option value="10">10</option>
-              <option value="11">11</option>
-              <option value="12">12</option>
+              <option value="">Selecione...</option>
+              <option value="1">1 - Individual (Ventilador)</option>
+              <option value="2">2 - Individual (Ventilador)</option>
+              <option value="3">3 - Individual (Ar Condicionado)</option>
+              <option value="4">4 - Individual (Ar Condicionado)</option>
+              <option value="5">5 - Duplo (Ventilador)</option>
+              <option value="6">6 - Duplo (Ventilador)</option>
+              <option value="7">7 - Duplo (Ar Condicionado)</option>
+              <option value="8">8 - Duplo (Ar Condicionado)</option>
+              <option value="9">9 - Triplo (Ventilador)</option>
+              <option value="10">10 - Triplo (Ventilador)</option>
+              <option value="11">11 - Triplo (Ar Condicionado)</option>
+              <option value="12">12 - Triplo (Ar Condicionado)</option>
             </select>
           </div>
-          <div class="form-group">
-            <label>Check-in</label>
-            <input type="date" id="checkin" required>
+        </div>
+
+        <!-- Airbnb Widget -->
+        <div class="airbnb-widget">
+          <div class="airbnb-dates-container">
+            <div class="airbnb-date-input checkin-box">
+              <label>CHECK-IN</label>
+              <input type="date" id="checkin" required>
+            </div>
+            <div class="airbnb-date-input checkout-box">
+              <label>CHECK-OUT</label>
+              <input type="date" id="checkout" required>
+            </div>
+          </div>
+          <div class="airbnb-guests-container">
+            <label>HÓSPEDES</label>
+            <select id="hospedesQuantidade" required>
+              <option value="1">1 hóspede</option>
+              <option value="2" selected>2 hóspedes</option>
+              <option value="3">3 hóspedes</option>
+              <option value="4">4 hóspedes</option>
+              <option value="5">5 hóspedes</option>
+            </select>
           </div>
         </div>
-        <div class="form-row">
-          <div class="form-group" style="flex: 1; max-width: 50%;">
-            <label>Check-out</label>
-            <input type="date" id="checkout" required>
+
+        <!-- Price Breakdown -->
+        <div class="airbnb-price-breakdown" id="priceBreakdown" style="display: none;">
+          <p class="breakdown-hint">Você não será cobrado ainda</p>
+          <div class="price-row">
+            <span id="calcNightsLabel">R$ 0,00 x 0 noites</span>
+            <span id="calcNightsTotal">R$ 0,00</span>
+          </div>
+          <div class="price-divider"></div>
+          <div class="price-row total">
+            <span>Total (BRL)</span>
+            <span id="calcGrandTotal">R$ 0,00</span>
           </div>
         </div>
-        <div class="modal-actions">
-          <button type="button" class="btn-outline" id="cancelModal">Cancelar</button>
-          <button type="submit" class="btn-primary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Salvar Reserva</button>
-        </div>
+
+        <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 1rem; margin-bottom: 1rem;">Obs: Cada diária vence ao 12:00 do dia seguinte</p>
+
+        <button type="submit" class="btn-airbnb-cta">Confirmar Reserva</button>
       </form>
       <div class="loading-overlay" id="addModalLoading">
         <div class="loading-card">
@@ -572,6 +606,7 @@
             <div id="detCheckout" style="font-weight:500;">-</div>
           </div>
         </div>
+        <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 1rem; margin-bottom: 0.5rem;">Obs: Cada diária vence ao 12:00 do dia seguinte</p>
       </div>
       <div class="modal-actions">
         <button type="button" class="btn-outline" id="cancelDetailsModal">Fechar</button>
@@ -598,7 +633,8 @@
           
           <div style="margin-bottom: 20px;">
             <strong>Meio de Hospedagem:</strong> Pousada da Nita<br>
-            <strong>Quarto:</strong> <span id="fnrhQuarto"></span>
+            <strong>Quarto:</strong> <span id="fnrhQuarto"></span><br>
+            <span style="font-size: 0.85em; font-style: italic;">Obs: Cada diária vence ao 12:00 do dia seguinte</span>
           </div>
 
           <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">

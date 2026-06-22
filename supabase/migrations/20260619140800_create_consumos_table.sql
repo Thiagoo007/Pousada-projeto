@@ -33,11 +33,19 @@ CREATE POLICY "Permitir delete de consumos" ON public.consumos FOR DELETE USING 
 GRANT ALL ON public.produtos TO anon, authenticated, service_role;
 GRANT ALL ON public.consumos TO anon, authenticated, service_role;
 
--- Inserir dados iniciais de teste
+-- Inserir dados reais de produção
 INSERT INTO public.produtos (nome, preco_venda) VALUES
-    ('Água Mineral S/ Gás 500ml', 5.00),
-    ('Água Mineral C/ Gás 500ml', 6.00),
-    ('Refrigerante Lata 350ml', 8.00),
-    ('Cerveja Long Neck', 12.00),
-    ('Amendoim / Snack', 10.00),
-    ('Chocolate Barra', 15.00);
+    ('Água mineral 500ml', 3.00),
+    ('Água com gás 500ml', 4.00),
+    ('Água de 1,5L', 5.00),
+    ('Refri de litro', 8.00),
+    ('Refri de dois litros', 14.00),
+    ('Cerveja lata', 5.00),
+    ('Heineken shot', 8.00),
+    ('Heineken normal', 10.00),
+    ('Coronita', 8.00),
+    ('Monster', 12.00),
+    ('Guaraná Kuat', 5.00),
+    ('Coca lata', 5.00),
+    ('Cuscuz com ovo', 16.00),
+    ('Lavanderia (por peça)', 4.00);

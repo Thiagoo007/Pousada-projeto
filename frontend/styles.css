@@ -923,3 +923,118 @@ tr:hover td {
   background: rgba(231, 76, 60, 0.15);
   color: var(--danger);
 }
+
+/* Airbnb Widget Styles */
+.airbnb-widget {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+  background: var(--bg-panel);
+}
+
+.airbnb-dates-container {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+}
+
+.airbnb-date-input {
+  flex: 1;
+  padding: 0.8rem 1rem;
+  position: relative;
+}
+
+.airbnb-date-input.checkin-box {
+  border-right: 1px solid var(--border);
+}
+
+.airbnb-date-input label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.2rem;
+}
+
+.airbnb-date-input input {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  outline: none;
+}
+
+.airbnb-guests-container {
+  padding: 0.8rem 1rem;
+}
+
+.airbnb-guests-container label {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 0.2rem;
+}
+
+.airbnb-guests-container select {
+  width: 100%;
+  border: none;
+  background: transparent;
+  padding: 0;
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  outline: none;
+}
+
+.btn-airbnb-cta {
+  width: 100%;
+  background: linear-gradient(to right, #E61E4D 0%, #E31C5F 50%, #D70466 100%);
+  color: white;
+  border: none;
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.btn-airbnb-cta:hover {
+  opacity: 0.9;
+}
+
+.airbnb-price-breakdown {
+  margin-bottom: 1.5rem;
+}
+
+.breakdown-hint {
+  text-align: center;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.price-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.8rem;
+  color: var(--text-main);
+  font-size: 0.95rem;
+}
+
+.price-row.total {
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-top: 1rem;
+  margin-bottom: 0;
+}
+
+.price-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 1rem 0;
+}
