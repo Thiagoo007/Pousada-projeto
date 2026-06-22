@@ -2,8 +2,8 @@ document.addEventListener('DOMContentLoaded', function() {
   console.log('[Pousada] Inicializando Dark Mode Pro Max...');
 
   // --- Supabase ---
-  const SUPABASE_URL = "http://127.0.0.1:54321";
-  const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0";
+  const SUPABASE_URL = "https://ukfdsvtjprpttrkpspzm.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_GNOcox9b0CKVlJ-mDvs6pg_5GXl1qsB";
 
   let supabase = null;
   if (window.supabase && window.supabase.createClient) {
