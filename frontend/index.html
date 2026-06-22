@@ -3,676 +3,124 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Pousada da Nita - Gestão de Hóspedes</title>
+  <title>Login - Pousada da Nita</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
-    /* --- Estilos de Impressão (FNRH) --- */
-    @media print {
-      body * {
-        visibility: hidden;
-      }
-      #fnrhPrintArea, #fnrhPrintArea * {
-        visibility: visible;
-        color: #000 !important;
-      }
-      #fnrhPrintArea {
-        position: absolute;
-        left: 0;
-        top: 0;
-        width: 100%;
-        background: #fff !important;
-        padding: 2cm;
-        box-sizing: border-box;
-      }
-      .modal-overlay, .sidebar, .top-header, .page-view {
-        display: none !important;
-      }
-      @page {
-        margin: 0;
-      }
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      background-color: var(--bg-body);
+      margin: 0;
+    }
+    .login-container {
+      background-color: var(--bg-card);
+      padding: 2.5rem;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-md);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+    .login-logo {
+      max-width: 150px;
+      margin-bottom: 2rem;
+    }
+    .login-container h2 {
+      margin-top: 0;
+      color: var(--text-dark);
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+    .form-group {
+      text-align: left;
+      margin-bottom: 1.25rem;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 500;
+      color: var(--text-dark);
+      font-size: 0.9rem;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-family: inherit;
+      font-size: 1rem;
+      box-sizing: border-box;
+      transition: all 0.2s ease;
+    }
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+    .btn-login {
+      width: 100%;
+      padding: 0.875rem;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: var(--radius-md);
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      margin-top: 1rem;
+    }
+    .btn-login:hover {
+      background-color: var(--primary-hover);
+    }
+    .login-error {
+      color: var(--danger-color);
+      background-color: #fee2e2;
+      padding: 0.75rem;
+      border-radius: var(--radius-md);
+      font-size: 0.875rem;
+      margin-bottom: 1rem;
+      display: none;
+    }
+    .recover-password {
+      display: block;
+      margin-top: 1rem;
+      font-size: 0.875rem;
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+    .recover-password:hover {
+      text-decoration: underline;
     }
   </style>
-  <link rel="stylesheet" href="styles.css?v=20">
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="logo" style="flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: 1rem;">
-      <!-- Sugiro que você salve a imagem que enviou como 'logo.png' dentro da pasta frontend -->
-      <img src="logo.png" alt="Pousada da Nita" style="max-width: 100%; height: auto; max-height: 80px; object-fit: contain;">
-    </div>
 
-    <nav class="nav-links">
-      <a href="#" class="nav-item active" data-target="view-dashboard">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-        Dashboard
-      </a>
-      <a href="#" class="nav-item" data-target="view-reservas">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-        Reservas
-      </a>
-      <a href="#" class="nav-item" data-target="view-hospedes">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-        Hóspedes (CRM)
-      </a>
-      <a href="#" class="nav-item" data-target="view-pagamentos">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
-        Pagamentos
-      </a>
-      <a href="#" class="nav-item" data-target="view-relatorios">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-        Relatórios
-      </a>
-      <a href="#" class="nav-item" data-target="view-configuracoes">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-        Configurações
-      </a>
-    </nav>
+  <div class="login-container">
+    <img src="logo.png" alt="Logo Pousada da Nita" class="login-logo" onerror="this.style.display='none'">
+    <h2>Acesso ao Sistema</h2>
+    
+    <div id="loginError" class="login-error">Credenciais inválidas.</div>
 
-    <div class="sidebar-footer">
-      <div class="user-avatar">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email">E-mail</label>
+        <input type="email" id="email" required placeholder="Digite seu e-mail">
       </div>
-      <div class="user-info-footer">
-        <strong>Pousada da Nita</strong>
-        <span>Sistema Local</span>
+      <div class="form-group">
+        <label for="password">Senha</label>
+        <input type="password" id="password" required placeholder="Digite sua senha">
       </div>
-    </div>
-  </aside>
-
-  <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
-
-  <!-- Main Content -->
-  <main>
-    <section id="view-dashboard" class="page-view active">
-      <header class="top-header">
-        <div class="page-title">
-          <button class="mobile-menu-btn" onclick="toggleSidebar()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-          </button>
-          <svg class="page-icon"  width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-          Dashboard
-        </div>
-        <div class="header-actions" style="display: flex; align-items: center; gap: 16px;">
-          <button class="btn-outline" onclick="document.querySelector('[data-target=\'view-pagamentos\']').click()" style="position: relative; padding: 0.5rem; border: none;" title="Ver Pendências">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-            <span id="pendencyBadge" style="position: absolute; top: 0px; right: 0px; background: var(--danger); color: white; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; display: none; align-items: center; justify-content: center; font-weight: bold; transform: translate(25%, -25%);">0</span>
-          </button>
-          <button class="btn-primary" id="addBtn">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            Nova Reserva
-          </button>
-        </div>
-      </header>
-
-      <div class="metrics-grid">
-        <div class="metric-card cyan-glow">
-          <div class="metric-info">
-            <h3>Faturamento Total</h3>
-            <p id="totalRevenue">R$ 0,00</p>
-            <span class="metric-subtitle success">Este mês ↗</span>
-          </div>
-          <div class="metric-icon cyan">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-          </div>
-        </div>
-        
-        <div class="metric-card blue-glow">
-          <div class="metric-info">
-            <h3>Hóspedes Ativos</h3>
-            <p id="activeGuests">0</p>
-            <span class="metric-subtitle">Atualmente hospedados</span>
-          </div>
-          <div class="metric-icon blue">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-          </div>
-        </div>
-
-        <div class="metric-card amber-glow">
-          <div class="metric-info">
-            <h3>Pagamentos Pendentes</h3>
-            <p id="pendingRevenue">R$ 0,00</p>
-            <span class="metric-subtitle pending"><span id="pendingCount">0</span> pendências</span>
-          </div>
-          <div class="metric-icon amber">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
-          </div>
-        </div>
-      </div>
-
-      <div class="content-split">
-        <div class="content-left">
-          <div class="section-header">
-            <h2>Reservas Ativas</h2>
-            <div class="search-box">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-              <input type="text" id="searchInput" placeholder="Buscar reserva...">
-              <button id="searchBtn" style="display:none;"></button>
-              <button id="clearBtn" style="display:none;" class="clear-search">&times;</button>
-            </div>
-          </div>
-          
-          <div class="table-card">
-            <table>
-              <thead>
-                <tr>
-                  <th>NOME</th>
-                  <th>QUARTO</th>
-                  <th>CHECK-IN</th>
-                  <th>CHECK-OUT</th>
-                  <th>STATUS</th>
-                  <th>TOTAL</th>
-                  <th>AÇÕES</th>
-                </tr>
-              </thead>
-              <tbody id="guestsTableBody">
-                <!-- Render via JS -->
-              </tbody>
-            </table>
-          </div>
-          <div class="table-footer" id="tableFooterInfo">
-            Mostrando 0 hóspedes
-          </div>
-        </div>
-
-      </div>
-    </section>
-
-    <section id="view-reservas" class="page-view">
-      <header class="top-header">
-        <div class="page-title">
-          <button class="mobile-menu-btn" onclick="toggleSidebar()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-          </button>
-          <svg class="page-icon"  width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
-          Gestão de Reservas
-        </div>
-        <button class="btn-primary" onclick="document.getElementById('addBtn').click()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-          Nova Reserva
-        </button>
-      </header>
-      <div class="content-left">
-        <div class="section-header" style="margin-top: 1rem;">
-          <h2>Mapa de Ocupação</h2>
-        </div>
-        <div id="roomMapGrid" class="room-map-grid">
-          <!-- Render via JS -->
-        </div>
-
-        <div class="section-header" style="margin-top: 2rem;">
-          <h2>Todas as Reservas</h2>
-          <div class="search-box">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <input type="text" id="searchReservasFull" placeholder="Buscar reserva...">
-          </div>
-        </div>
-        <div class="table-card">
-          <table>
-            <thead>
-              <tr>
-                <th>HÓSPEDE</th>
-                <th>QUARTO</th>
-                <th>CHECK-IN</th>
-                <th>CHECK-OUT</th>
-                <th>STATUS</th>
-                <th>TOTAL</th>
-                <th>AÇÕES</th>
-              </tr>
-            </thead>
-            <tbody id="reservasFullTableBody">
-              <!-- Render via JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section id="view-hospedes" class="page-view">
-      <header class="top-header">
-        <div class="page-title">
-          <button class="mobile-menu-btn" onclick="toggleSidebar()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-          </button>
-          <svg class="page-icon"  width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
-          CRM de Clientes
-        </div>
-      </header>
-      <div class="content-left">
-        <div class="section-header">
-          <h2>Lista de Clientes Cadastrados</h2>
-          <div class="search-box">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-            <input type="text" id="searchHospedesFull" placeholder="Buscar cliente...">
-          </div>
-        </div>
-        <div class="table-card">
-          <table>
-            <thead>
-              <tr>
-                <th>NOME</th>
-                <th>CPF</th>
-                <th>TELEFONE</th>
-                <th>CADASTRO</th>
-              </tr>
-            </thead>
-            <tbody id="guestsFullTableBody">
-              <!-- Render via JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section id="view-pagamentos" class="page-view">
-      <header class="top-header">
-        <div class="page-title">
-          <button class="mobile-menu-btn" onclick="toggleSidebar()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-          </button>
-          <svg class="page-icon"  width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
-          Pagamentos
-        </div>
-      </header>
-      <div class="content-left">
-        <div class="section-header">
-          <h2>Histórico Financeiro</h2>
-          <div class="filter-group" id="paymentFilters" style="display:flex; gap:0.5rem;">
-            <button class="btn-sm-outline active" data-filter="all">Todos</button>
-            <button class="btn-sm-outline" data-filter="recebidos">Recebidos</button>
-            <button class="btn-sm-outline" data-filter="pendentes">Pendentes</button>
-          </div>
-        </div>
-        <div class="table-card">
-          <table>
-            <thead>
-              <tr>
-                <th>DATA / HORA</th>
-                <th>HÓSPEDE</th>
-                <th>QUARTO</th>
-                <th>MÉTODO</th>
-                <th>VALOR</th>
-              </tr>
-            </thead>
-            <tbody id="paymentsTableBody">
-              <!-- Placeholder handled by JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-
-    <section id="view-relatorios" class="page-view">
-      <header class="top-header">
-        <div class="page-title">
-          <button class="mobile-menu-btn" onclick="toggleSidebar()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-          </button>
-          <svg class="page-icon"  width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-          Relatórios Gerenciais
-        </div>
-      </header>
-      <div class="metrics-grid">
-        <div class="metric-card">
-          <div class="metric-info">
-            <h3>Receita Total</h3>
-            <p id="dreReceitaTotal">R$ 0,00</p>
-            <span class="metric-subtitle">Projeção (Pago + Pendente)</span>
-          </div>
-        </div>
-        <div class="metric-card cyan-glow">
-          <div class="metric-info">
-            <h3>Receita Recebida</h3>
-            <p id="dreReceitaRecebida">R$ 0,00</p>
-            <span class="metric-subtitle success">Caixa Realizado</span>
-          </div>
-        </div>
-        <div class="metric-card amber-glow">
-          <div class="metric-info">
-            <h3>Inadimplência</h3>
-            <p id="dreInadimplencia">R$ 0,00</p>
-            <span class="metric-subtitle pending">Pagamentos Pendentes</span>
-          </div>
-        </div>
-        <div class="metric-card blue-glow">
-          <div class="metric-info">
-            <h3>Ticket Médio</h3>
-            <p id="dreTicketMedio">R$ 0,00</p>
-            <span class="metric-subtitle">Por reserva</span>
-          </div>
-        </div>
-      </div>
-      <div class="content-split" style="margin-top: 1.5rem; gap: 1.5rem;">
-        <div class="table-card" style="flex: 2; padding: 1.5rem;">
-          <h3 style="margin-bottom: 1rem; color: #fff;">Faturamento por Método de Pagamento</h3>
-          <canvas id="metodoPagamentoChart"></canvas>
-        </div>
-        <div class="table-card" style="flex: 1; padding: 1.5rem;">
-          <h3 style="margin-bottom: 1rem; color: #fff;">Receita Pendente vs Paga</h3>
-          <canvas id="statusPagamentoChart"></canvas>
-        </div>
-      </div>
-    </section>
-
-    <section id="view-configuracoes" class="page-view">
-      <header class="top-header">
-        <div class="page-title">
-          <button class="mobile-menu-btn" onclick="toggleSidebar()">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
-          </button>
-          <svg class="page-icon"  width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-          Configurações
-        </div>
-      </header>
-      <div class="content-left">
-        <div class="section-header">
-          <h2>Perfis de Acesso</h2>
-        </div>
-        <div class="table-card">
-          <table>
-            <thead>
-              <tr>
-                <th>PERFIL</th>
-                <th>PERMISSÕES (RLS)</th>
-                <th>AÇÕES</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td><strong>Administrador</strong></td>
-                <td>Acesso total (Leitura e Escrita em todas tabelas)</td>
-                <td><button class="btn-sm-outline" disabled>Padrão</button></td>
-              </tr>
-              <tr>
-                <td><strong>Recepção</strong></td>
-                <td>Criar hóspedes, Registrar pagamentos, Editar cadastros</td>
-                <td><button class="btn-sm-outline">Editar</button></td>
-              </tr>
-              <tr>
-                <td><strong>Governança</strong></td>
-                <td>Apenas leitura (Visualizar status dos Quartos)</td>
-                <td><button class="btn-sm-outline">Editar</button></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Add Modal -->
-  <div class="modal-overlay" id="addModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Nova Reserva</h2>
-        <button type="button" class="close-btn" id="closeModal">&times;</button>
-      </div>
-      <form id="addForm">
-        <!-- Personal Info -->
-        <div class="form-row">
-          <div class="form-group" style="flex: 2;">
-            <label>Nome completo</label>
-            <input type="text" id="nome" placeholder="Digite o nome completo" required>
-          </div>
-          <div class="form-group" style="flex: 1;">
-            <label>CPF</label>
-            <input type="text" id="cpf" placeholder="000.000.000-00" required>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group" style="flex: 1;">
-            <label>Telefone</label>
-            <input type="text" id="telefone" placeholder="(11) 99999-9999">
-          </div>
-          <div class="form-group" style="flex: 1;">
-            <label>Quarto</label>
-            <select id="quarto" required>
-              <option value="">Selecione...</option>
-              <option value="1">1 - Individual (Ventilador)</option>
-              <option value="2">2 - Individual (Ventilador)</option>
-              <option value="3">3 - Individual (Ar Condicionado)</option>
-              <option value="4">4 - Individual (Ar Condicionado)</option>
-              <option value="5">5 - Duplo (Ventilador)</option>
-              <option value="6">6 - Duplo (Ventilador)</option>
-              <option value="7">7 - Duplo (Ar Condicionado)</option>
-              <option value="8">8 - Duplo (Ar Condicionado)</option>
-              <option value="9">9 - Triplo (Ventilador)</option>
-              <option value="10">10 - Triplo (Ventilador)</option>
-              <option value="11">11 - Triplo (Ar Condicionado)</option>
-              <option value="12">12 - Triplo (Ar Condicionado)</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Airbnb Widget -->
-        <div class="airbnb-widget">
-          <div class="airbnb-dates-container">
-            <div class="airbnb-date-input checkin-box">
-              <label>CHECK-IN</label>
-              <input type="date" id="checkin" required>
-            </div>
-            <div class="airbnb-date-input checkout-box">
-              <label>CHECK-OUT</label>
-              <input type="date" id="checkout" required>
-            </div>
-          </div>
-          <div class="airbnb-guests-container">
-            <label>HÓSPEDES</label>
-            <select id="hospedesQuantidade" required>
-              <option value="1">1 hóspede</option>
-              <option value="2" selected>2 hóspedes</option>
-              <option value="3">3 hóspedes</option>
-              <option value="4">4 hóspedes</option>
-              <option value="5">5 hóspedes</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Price Breakdown -->
-        <div class="airbnb-price-breakdown" id="priceBreakdown" style="display: none;">
-          <p class="breakdown-hint">Você não será cobrado ainda</p>
-          <div class="price-row">
-            <span id="calcNightsLabel">R$ 0,00 x 0 noites</span>
-            <span id="calcNightsTotal">R$ 0,00</span>
-          </div>
-          <div class="price-divider"></div>
-          <div class="price-row total">
-            <span>Total (BRL)</span>
-            <span id="calcGrandTotal">R$ 0,00</span>
-          </div>
-        </div>
-
-        <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 1rem; margin-bottom: 1rem;">Obs: Cada diária vence ao 12:00 do dia seguinte</p>
-
-        <button type="submit" class="btn-airbnb-cta">Confirmar Reserva</button>
-      </form>
-      <div class="loading-overlay" id="addModalLoading">
-        <div class="loading-card">
-          <div class="spinner"></div>
-          <h4>Salvando...</h4>
-        </div>
-      </div>
-    </div>
+      <button type="submit" class="btn-login" id="loginBtn">Entrar</button>
+    </form>
+    
+    <a href="#" class="recover-password" id="recoverLink">Esqueci minha senha</a>
   </div>
 
-  <!-- Pay Modal -->
-  <div class="modal-overlay" id="payModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Lançamento de Pagamento</h2>
-        <button type="button" class="close-btn" id="closePayModal">&times;</button>
-      </div>
-      <form id="payForm">
-        <input type="hidden" id="payHospedeId">
-        <div class="form-group">
-          <label>Hóspede</label>
-          <input type="text" id="payHospedeNome" disabled>
-        </div>
-        <div class="form-group">
-          <label>Valor (R$)</label>
-          <input type="number" id="payValor" step="0.01" placeholder="0,00" required>
-        </div>
-        <div class="form-group">
-          <label>Método de Pagamento</label>
-          <select id="payMetodo" required>
-            <option value="">Selecione o método</option>
-            <option value="pix">PIX</option>
-            <option value="cartao_credito">Cartão de Crédito</option>
-            <option value="cartao_debito">Cartão de Débito</option>
-            <option value="dinheiro">Dinheiro</option>
-          </select>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn-outline" id="cancelPayModal">Cancelar</button>
-          <button type="submit" class="btn-primary"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg> Registrar Pagamento</button>
-        </div>
-      </form>
-      <div class="loading-overlay" id="payModalLoading">
-        <div class="loading-card">
-          <div class="spinner"></div>
-          <h4>Processando...</h4>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Consumption Modal -->
-  <div class="modal-overlay" id="consumoModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Lançar Consumo</h2>
-        <button type="button" class="close-btn" id="closeConsumoModal">&times;</button>
-      </div>
-      <form id="consumoForm">
-        <input type="hidden" id="consumoReservaId">
-        <div class="form-group">
-          <label>Hóspede / Quarto</label>
-          <input type="text" id="consumoHospedeNome" disabled>
-        </div>
-        <div class="form-row">
-          <div class="form-group" style="flex: 2;">
-            <label>Produto</label>
-            <select id="consumoProdutoId" required>
-              <option value="">Selecione um produto...</option>
-              <!-- Populated by JS -->
-            </select>
-          </div>
-          <div class="form-group" style="flex: 1;">
-            <label>Quantidade</label>
-            <input type="number" id="consumoQuantidade" min="1" value="1" required>
-          </div>
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn-outline" id="cancelConsumoModal">Cancelar</button>
-          <button type="submit" class="btn-primary">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path><line x1="3" y1="6" x2="21" y2="6"></line><path d="M16 10a4 4 0 0 1-8 0"></path></svg>
-            Lançar
-          </button>
-        </div>
-      </form>
-      <div class="loading-overlay" id="consumoModalLoading">
-        <div class="spinner"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Details Modal (Read-Only) -->
-  <div class="modal-overlay" id="detailsModal">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h2>Detalhes da Reserva</h2>
-        <button type="button" class="close-btn" id="closeDetailsModal">&times;</button>
-      </div>
-      <div class="modal-body" style="padding: 1.5rem;">
-        <div style="display:flex; justify-content:space-between; margin-bottom: 1rem;">
-          <div>
-            <h3 id="detNome" style="margin-bottom:0.3rem;">-</h3>
-            <span id="detTelefone" style="color:var(--text-muted);font-size:0.9rem;">-</span>
-          </div>
-          <div style="text-align:right;">
-            <div id="detQuarto" style="font-weight:600; margin-bottom:0.3rem;">-</div>
-            <span id="detStatusBadge" class="badge badge-pendente">PENDENTE</span>
-          </div>
-        </div>
-        <div style="display:flex; gap:1rem; background:var(--bg-secondary); padding:1rem; border-radius:8px; margin-bottom: 1.5rem;">
-          <div style="flex:1;">
-            <div style="color:var(--text-muted);font-size:0.8rem;margin-bottom:0.3rem;">Check-in</div>
-            <div id="detCheckin" style="font-weight:500;">-</div>
-          </div>
-          <div style="flex:1;">
-            <div style="color:var(--text-muted);font-size:0.8rem;margin-bottom:0.3rem;">Check-out</div>
-            <div id="detCheckout" style="font-weight:500;">-</div>
-          </div>
-        </div>
-        <p style="font-size: 0.8rem; color: var(--text-muted); text-align: center; margin-top: 1rem; margin-bottom: 0.5rem;">Obs: Cada diária vence ao 12:00 do dia seguinte</p>
-      </div>
-      <div class="modal-actions">
-        <button type="button" class="btn-outline" id="cancelDetailsModal">Fechar</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- FNRH Print Area Modal -->
-  <div class="modal-overlay" id="fnrhModal">
-    <div class="modal-content" style="max-width: 800px;">
-      <div class="modal-header">
-        <h2>Visualizar FNRH</h2>
-        <div>
-          <button type="button" class="btn-primary" onclick="window.print()" style="margin-right: 10px;">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
-            Imprimir FNRH
-          </button>
-          <button type="button" class="close-btn" id="closeFnrhModal">&times;</button>
-        </div>
-      </div>
-      <div class="modal-body" style="padding: 1.5rem; background: #fff; color: #000; overflow-y: auto; max-height: 70vh;">
-        <div id="fnrhPrintArea" style="font-family: Arial, sans-serif; line-height: 1.6; color: #000;">
-          <h2 style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 20px;">Ficha Nacional de Registro de Hóspedes (FNRH)</h2>
-          
-          <div style="margin-bottom: 20px;">
-            <strong>Meio de Hospedagem:</strong> Pousada da Nita<br>
-            <strong>Quarto:</strong> <span id="fnrhQuarto"></span><br>
-            <span style="font-size: 0.85em; font-style: italic;">Obs: Cada diária vence ao 12:00 do dia seguinte</span>
-          </div>
-
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
-            <tr>
-              <td style="border: 1px solid #000; padding: 8px; width: 50%;"><strong>Nome Completo:</strong><br> <span id="fnrhNome"></span></td>
-              <td style="border: 1px solid #000; padding: 8px; width: 50%;"><strong>CPF:</strong><br> <span id="fnrhCpf"></span></td>
-            </tr>
-            <tr>
-              <td style="border: 1px solid #000; padding: 8px;"><strong>Data de Check-in:</strong><br> <span id="fnrhCheckin"></span></td>
-              <td style="border: 1px solid #000; padding: 8px;"><strong>Data de Check-out:</strong><br> <span id="fnrhCheckout"></span></td>
-            </tr>
-            <tr>
-              <td colspan="2" style="border: 1px solid #000; padding: 8px;"><strong>Telefone:</strong><br> <span id="fnrhTelefone"></span></td>
-            </tr>
-          </table>
-
-          <div style="border: 1px solid #000; padding: 15px; margin-bottom: 20px;">
-            <h4 style="margin-top: 0; border-bottom: 1px solid #ccc; padding-bottom: 5px;">Dados Complementares (Preencher no Balcão)</h4>
-            <div style="margin-bottom: 15px;"><strong>RG / Órgão Expedidor:</strong> ___________________________________________________________</div>
-            <div style="margin-bottom: 15px;"><strong>Endereço Completo:</strong> ______________________________________________________________</div>
-            <div style="margin-bottom: 15px;"><strong>Cidade / UF:</strong> ______________________________________ <strong>CEP:</strong> _____________________</div>
-            <div style="margin-bottom: 15px;"><strong>Placa do Veículo:</strong> ___________________________ <strong>Nacionalidade:</strong> ______________________</div>
-            <div style="margin-bottom: 15px;"><strong>Motivo da Viagem:</strong> ( ) Lazer  ( ) Negócios  ( ) Outro _________________________________</div>
-          </div>
-
-          <div style="margin-top: 40px; text-align: center;">
-            <p>Declaro serem verdadeiras as informações acima.</p>
-            <br><br>
-            ___________________________________________________________<br>
-            <strong>Assinatura do Hóspede</strong>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class="toast-container" id="toastContainer"></div>
-
-  <script src="app.js?v=22"></script>
+  <script src="login.js"></script>
 </body>
 </html>

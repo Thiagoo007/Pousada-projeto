@@ -21,6 +21,12 @@ O projeto avançou de forma sólida nas suas fundações. Até o momento, o que 
 - **Pagamentos Básicos:** Aba de pagamentos e filtros operacionais no frontend, além da baixa de pagamentos implementada no backend.
 - **Personalização:** Atualização de identidade visual na barra lateral com a logo real da pousada, ajustando o design para algo com a cara da empresa.
 
+### Atualização Contínua (Últimas Entregas de UX e Segurança)
+- **Segurança de Sessão:** Fim da persistência perpétua de dados de login. Sessão agora cai automaticamente ao fechar a aba/navegador, garantindo que o fluxo passe sempre pela tela de Login (`login.html`).
+- **Dashboard Focado no Diário:** O dashboard agora não mostra reservas avulsas, mas sim duas listas de extrema importância para a recepção: "Check-ins de Hoje" e "Check-outs de Hoje".
+- **Gestão de Reservas Aprimorada:** Inclusão de botões rápidos de filtro de status (Todas, Em Andamento, Próximas, Finalizadas/Canceladas). Formulário inteligente que calcula automaticamente o valor total baseado na climatização escolhida (Ar/Ventilador) e duração da estadia (multiplicado pelo número de hóspedes).
+- **Ações na Reserva:** Inclusão de funcionalidade de "Cancelar" reserva com baixa direta no banco de dados e atualização nos relatórios financeiros exibindo o total Consumido no Frigobar + Valor da Estadia.
+
 ---
 
 ## 2. O que deu CERTO (Fortalezas)

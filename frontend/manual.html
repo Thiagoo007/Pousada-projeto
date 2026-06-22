@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manual do Usuário - Pousada da Nita</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    body { padding: 3rem 1rem; background: var(--bg-body); color: var(--text-color); max-width: 800px; margin: auto; font-family: 'Outfit', sans-serif; }
+    h1 { color: var(--primary); text-align: center; margin-bottom: 0.5rem; }
+    .story-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
+    .story-card h3 { color: var(--secondary); margin-top: 0; display: flex; align-items: center; gap: 10px; font-size: 1.3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+    .step { display: flex; gap: 1.2rem; margin-top: 1.2rem; }
+    .step-number { background: var(--primary); color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; box-shadow: 0 0 10px var(--primary); }
+    .step-text { line-height: 1.6; color: var(--text-muted); font-size: 1.05rem; }
+    .step-text strong { color: var(--text-color); font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>📘 Manual do Usuário e Fluxos de Uso</h1>
+  <p style="text-align: center; margin-bottom: 3rem; color: var(--text-muted); font-size: 1.1rem;">Aprenda na prática como usar o sistema da Pousada da Nita através de histórias reais de navegação.</p>
+
+  <div class="story-card">
+    <h3>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><polyline points="17 11 19 13 23 9"></polyline></svg> 
+      Cenário 1: Novo Hóspede Chega na Recepção (Walk-in)
+    </h3>
+    <p style="color: var(--primary); font-style: italic; margin-bottom: 1.5rem;">"Um casal chega de surpresa e deseja um quarto com ar condicionado para o fim de semana (2 noites)."</p>
+    
+    <div class="step">
+      <div class="step-number">1</div>
+      <div class="step-text"><strong>Iniciar Cadastro:</strong> No <em>Dashboard principal</em> ou na aba <em>Reservas</em>, clique no botão azul brilhante <strong>"Nova Reserva"</strong> no canto superior direito.</div>
+    </div>
+    <div class="step">
+      <div class="step-number">2</div>
+      <div class="step-text"><strong>Preencher Dados:</strong> Digite o nome completo, CPF e telefone. No campo "Total de Hóspedes", deixe marcado <strong>2 Pessoas</strong>.</div>
+    </div>
+    <div class="step">
+      <div class="step-number">3</div>
+      <div class="step-text"><strong>Detalhes da Estadia:</strong> Escolha a data de hoje para o Check-in e a data de domingo para o Check-out. Selecione um quarto disponível (ex: Quarto 1) e em Climatização escolha <strong>Ar Cond. (R$ 90/dia)</strong>.</div>
+    </div>
+    <div class="step">
+      <div class="step-number">4</div>
+      <div class="step-text"><strong>Cálculo Automático:</strong> Observe na caixa de total previsto como o sistema calcula tudo instantaneamente. O valor exibirá: 2 pessoas × 2 noites × R$ 90 = R$ 360,00. Clique em <strong>Confirmar Reserva</strong>.</div>
+    </div>
+    <div class="step">
+      <div class="step-number">5</div>
+      <div class="step-text"><strong>Entregar as Chaves:</strong> Na aba <em>Reservas</em>, localize a reserva feita na tabela de listagem e clique no ícone de play verde (►) na coluna de ações para alterar o status para <strong>Check-in</strong>. O quarto no mapa mudará de cor indicando ocupação.</div>
+    </div>
+  </div>
+
+  <div class="story-card">
+    <h3>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 
+      Cenário 2: Consumo Extra (Frigobar)
+    </h3>
+    <p style="color: var(--warning); font-style: italic; margin-bottom: 1.5rem;">"O hóspede do Quarto 1 desce à recepção e pede uma Água com Gás."</p>
+    
+    <div class="step">
+      <div class="step-number">1</div>
+      <div class="step-text"><strong>Acessar a Conta:</strong> Na aba <em>Reservas</em>, encontre o hóspede e clique no ícone de "olho" (Ver Detalhes) na linha correspondente ao Quarto 1.</div>
+    </div>
+    <div class="step">
+      <div class="step-number">2</div>
+      <div class="step-text"><strong>Lançar o Item:</strong> No painel lateral que se abre, role até a seção "Frigobar / Consumo". Selecione "Água com gás" no menu, deixe a quantidade como 1 e clique no botão de Adicionar.</div>
+    </div>
+    <div class="step">
+      <div class="step-number">3</div>
+      <div class="step-text"><strong>Atualização em Tempo Real:</strong> A tela atualizará instantaneamente. O valor da água será somado à dívida da estadia, mantendo o controle total da conta de forma transparente.</div>
+    </div>
+  </div>
+
+  <div class="story-card">
+    <h3>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> 
+      Cenário 3: Fim da Viagem (Check-out e Pagamento)
+    </h3>
+    <p style="color: var(--secondary); font-style: italic; margin-bottom: 1.5rem;">"Chegou o domingo. O hóspede quer pagar tudo e ir embora."</p>
+    
+    <div class="step">
+      <div class="step-number">1</div>
+      <div class="step-text"><strong>Resumo e FNRH:</strong> Na aba <em>Reservas</em>, clique em Ver Detalhes. Você verá o valor total (Estadia + Consumo). Se a polícia ou fiscalização exigir, clique em <strong>Imprimir FNRH</strong>. O sistema gera a ficha oficial em PDF.</div>
+    </div>
+    <div class="step">
+      <div class="step-number">2</div>
+      <div class="step-text"><strong>Cobrança:</strong> Informe o valor final ao hóspede. Assim que ele realizar o PIX ou passar o cartão, vá para a aba <em>Pagamentos</em> e faça a baixa da pendência confirmando o recebimento.</div>
+    </div>
+    <div class="step">
+      <div class="step-number">3</div>
+      <div class="step-text"><strong>Liberar o Quarto:</strong> Retorne à aba <em>Reservas</em>, clique no ícone quadrado vermelho (■) correspondente ao hóspede para encerrar a estadia (Fazer Check-out). O mapa limpará o Quarto 1, deixando-o pronto para o próximo cliente!</div>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 3rem;">
+    <button onclick="window.close()" style="background: transparent; border: 1px solid var(--border-color); color: var(--text-color); padding: 1rem 3rem; border-radius: 8px; cursor: pointer; font-size: 1rem; transition: all 0.2s;" onmouseover="this.style.background='var(--bg-card)'" onmouseout="this.style.background='transparent'">Fechar Manual</button>
+  </div>
+</body>
+</html>

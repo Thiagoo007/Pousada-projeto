@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('[Pousada] Inicializando Dark Mode Pro Max...');
+  // console.log('[Pousada] Inicializando Dark Mode Pro Max...');
 
   // --- Supabase ---
   const SUPABASE_URL = "https://ukfdsvtjprpttrkpspzm.supabase.co";
@@ -8,15 +8,54 @@ document.addEventListener('DOMContentLoaded', function() {
   let supabase = null;
   if (window.supabase && window.supabase.createClient) {
     try {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-      console.log('[Pousada] Supabase OK.');
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+        auth: {
+          storage: window.sessionStorage,
+          autoRefreshToken: true
+        }
+      });
+      // console.log('[Pousada] Supabase OK.');
+      
+      // --- AUTH CHECK ---
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (!session) {
+          window.location.href = 'index.html';
+        } else {
+          const user = session.user;
+          const loggedName = document.getElementById('loggedUserName');
+          const loggedRole = document.getElementById('loggedUserRole');
+          if(loggedName) loggedName.textContent = user.email.split('@')[0];
+          if(loggedRole) loggedRole.textContent = 'Autenticado via Supabase';
+
+          // --- IDLE TIMEOUT (30 MINUTOS) ---
+          let idleTimer;
+          const resetIdleTimer = () => {
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(async () => {
+              // console.log('[Segurança] Sessão expirada por inatividade.');
+              if (supabase) await supabase.auth.signOut();
+              window.location.replace('index.html');
+            }, 30 * 60 * 1000); // 30 min = 1800000 ms
+          };
+          
+          // Inicia a contagem
+          resetIdleTimer();
+          
+          // Reseta a contagem se houver qualquer interação na tela
+          ['mousemove', 'keydown', 'click', 'scroll', 'touchstart'].forEach(event => {
+            window.addEventListener(event, resetIdleTimer, { passive: true });
+          });
+        }
+      });
+      
     } catch (e) {
       console.error('[Pousada] Supabase falhou:', e);
     }
   }
 
   // --- DOM Elements ---
-  const guestsTableBody = document.getElementById('guestsTableBody'); // now for dashboard
+  const checkinsTodayBody = document.getElementById('checkinsTodayBody');
+  const checkoutsTodayBody = document.getElementById('checkoutsTodayBody');
   const reservasFullTableBody = document.getElementById('reservasFullTableBody');
   const guestsFullTableBody = document.getElementById('guestsFullTableBody');
   
@@ -59,6 +98,9 @@ document.addEventListener('DOMContentLoaded', function() {
   const pendingRevenueEl = document.getElementById('pendingRevenue');
   const pendingCountEl = document.getElementById('pendingCount');
 
+  // Configurações
+  const logsAcessoTableBody = document.getElementById('logsAcessoTableBody');
+
   const searchInput = document.getElementById('searchInput');
   const clearBtn = document.getElementById('clearBtn');
   
@@ -66,7 +108,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const searchHospedesFull = document.getElementById('searchHospedesFull');
 
   const toastContainer = document.getElementById('toastContainer');
-  const tableFooterInfo = document.getElementById('tableFooterInfo');
 
   const pendenciasList = document.getElementById('pendenciasList');
   const activityList = document.getElementById('activityList');
@@ -195,22 +236,17 @@ document.addEventListener('DOMContentLoaded', function() {
     const diffTime = Math.abs(dOut - dIn);
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     
-    const quartoSelect = document.getElementById('quarto');
-    const qValue = quartoSelect ? parseInt(quartoSelect.value) : 0;
+    const climatizacaoSelect = document.getElementById('climatizacao');
+    const climatizacao = climatizacaoSelect ? climatizacaoSelect.value : 'ventilador';
+    const hospedesSelect = document.getElementById('hospedesQuantidade');
+    const numHospedes = hospedesSelect ? parseInt(hospedesSelect.value) : 1;
     
-    let valorDiaria = 0;
-    if (qValue === 1 || qValue === 2) valorDiaria = 60;
-    else if (qValue === 3 || qValue === 4) valorDiaria = 90;
-    else if (qValue === 5 || qValue === 6) valorDiaria = 100;
-    else if (qValue === 7 || qValue === 8) valorDiaria = 160;
-    else if (qValue === 9 || qValue === 10) valorDiaria = 140;
-    else if (qValue === 11 || qValue === 12) valorDiaria = 210;
-    else valorDiaria = 0;
-
+    const valorDiariaBase = (climatizacao === 'ar') ? 90 : 70;
+    const valorDiaria = valorDiariaBase * numHospedes;
     const totalDiarias = valorDiaria * diffDays;
     const total = totalDiarias;
     
-    if (calcNightsLabel) calcNightsLabel.textContent = `R$ ${valorDiaria.toFixed(2).replace('.', ',')} x ${diffDays} noites`;
+    if (calcNightsLabel) calcNightsLabel.textContent = `R$ ${valorDiaria.toFixed(2).replace('.', ',')} x ${diffDays} noites (${numHospedes} hóspede${numHospedes > 1 ? 's' : ''})`;
     if (calcNightsTotal) calcNightsTotal.textContent = `R$ ${totalDiarias.toFixed(2).replace('.', ',')}`;
     if (calcGrandTotal) calcGrandTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
     
@@ -221,6 +257,10 @@ document.addEventListener('DOMContentLoaded', function() {
   if (inputCheckout) inputCheckout.addEventListener('change', updatePriceBreakdown);
   const quartoSelectGlobal = document.getElementById('quarto');
   if (quartoSelectGlobal) quartoSelectGlobal.addEventListener('change', updatePriceBreakdown);
+  const climatizacaoSelectGlobal = document.getElementById('climatizacao');
+  if (climatizacaoSelectGlobal) climatizacaoSelectGlobal.addEventListener('change', updatePriceBreakdown);
+  const hospedesSelectGlobal = document.getElementById('hospedesQuantidade');
+  if (hospedesSelectGlobal) hospedesSelectGlobal.addEventListener('change', updatePriceBreakdown);
 
   window.openPayModal = function(id, name, room) {
     payHospedeId.value = id;
@@ -260,45 +300,77 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   };
 
+  window.doCancel = async function(reserva_id) {
+    if(!supabase) return showToast('Modo offline', 'warning');
+    if(!confirm('Tem certeza que deseja cancelar esta reserva? A ação não pode ser desfeita.')) return;
+    try {
+      const {error} = await supabase.from('reservas').update({status: 'cancelada'}).eq('id', reserva_id);
+      if(error) throw error;
+      showToast('Reserva cancelada com sucesso!');
+      fetchAll();
+    } catch(e) {
+      showToast(e.message, 'error');
+    }
+  }
+
   window.doCheckout = async function(reserva_id, hospede_id) {
     if(!supabase) return showToast('Modo offline', 'warning');
-    setLoading('pay', true); // reusa loading para check-out demorado
+    setLoading('pay', true);
     try {
-      const {error} = await supabase.from('reservas').update({status: 'check-out'}).eq('id', reserva_id);
-      if(error) throw error;
+      // 1. Liberação do Mapa de Ocupação: Atualiza o status da reserva para check-out
+      const {error: errRes} = await supabase.from('reservas').update({status: 'check-out'}).eq('id', reserva_id);
+      if(errRes) throw errRes;
       
-      // Calcular valor de consumos
+      // 2. Calcula total de consumos dessa reserva
       let totalConsumo = 0;
       const {data: consData, error: errCons} = await supabase.from('consumos').select('valor_total_item').eq('reserva_id', reserva_id);
       if(!errCons && consData) {
         totalConsumo = consData.reduce((acc, c) => acc + Number(c.valor_total_item), 0);
       }
 
-      // Calcula diárias
-      const reserva = allReservas.find(r => r.id === reserva_id);
-      let diffDays = 1;
-      if (reserva && reserva.data_checkin && reserva.data_checkout) {
-        const dIn = new Date(reserva.data_checkin);
-        const dOut = new Date(reserva.data_checkout);
-        const diffTime = Math.abs(dOut - dIn);
-        diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        if (diffDays === 0) diffDays = 1;
+      // 3. Atualização de Pagamento: Busca o pagamento pendente associado ao hóspede
+      const { data: payData, error: errGetPay } = await supabase
+        .from('pagamentos')
+        .select('*')
+        .eq('hospede_id', hospede_id)
+        .eq('status', 'pendente')
+        .order('id', { ascending: false })
+        .limit(1)
+        .single();
+        
+      let valorFinalDescricao = 0;
+
+      if (!errGetPay && payData) {
+        // Encontrou o pagamento original das diárias. Somamos os consumos nele.
+        const novoValorConsolidado = Number(payData.valor) + totalConsumo;
+        valorFinalDescricao = novoValorConsolidado;
+        
+        const {error: errUpdPay} = await supabase
+          .from('pagamentos')
+          .update({ valor: novoValorConsolidado })
+          .eq('id', payData.id);
+          
+        if(errUpdPay) throw errUpdPay;
+      } else if (totalConsumo > 0) {
+        // Se por algum motivo o hóspede não tiver pagamento pendente (já pagou a diária adiantado),
+        // e ele tem consumo, gera um novo pagamento pendente apenas do consumo.
+        valorFinalDescricao = totalConsumo;
+        const {error: errPay} = await supabase.from('pagamentos').insert([{
+          hospede_id: hospede_id,
+          valor: totalConsumo,
+          metodo_pagamento: 'pendente',
+          status: 'pendente'
+        }]);
+        if(errPay) throw errPay;
+      } else {
+        // Sem pendências e sem consumo
+        valorFinalDescricao = 0;
       }
-      const valorDiaria = 200.00; // Valor da diária
-      const totalDiarias = valorDiaria * diffDays;
-      const valorTotal = totalDiarias + totalConsumo;
 
-      const {error: errPay} = await supabase.from('pagamentos').insert([{
-        hospede_id: hospede_id,
-        valor: valorTotal,
-        metodo_pagamento: 'pendente',
-        status: 'pendente'
-      }]);
-      if(errPay) throw errPay;
-
-      showToast(`Check-out realizado! Total: R$ ${valorTotal.toFixed(2)} (Diárias + Consumo)`);
-      fetchAll();
+      showToast(`Check-out concluído! Conta atualizada: R$ ${valorFinalDescricao.toFixed(2)}`);
+      fetchAll(); // Isso fará a tabela e o mapa de ocupação atualizarem
     } catch(e) {
+      console.error(e);
       showToast(e.message, 'error');
     } finally {
       setLoading('pay', false);
@@ -310,7 +382,7 @@ document.addEventListener('DOMContentLoaded', function() {
   const closeDetailsModalBtn = document.getElementById('closeDetailsModal');
   const cancelDetailsModalBtn = document.getElementById('cancelDetailsModal');
 
-  window.openDetailsModal = function(id) {
+  window.openDetailsModal = async function(id) {
     const reserva = allReservas.find(r => r.id == id);
     if(!reserva) return;
 
@@ -325,6 +397,47 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('detCheckin').textContent = formatDate(reserva.data_checkin);
     document.getElementById('detCheckout').textContent = formatDate(reserva.data_checkout);
     
+    // 1. Duração
+    const dIn = new Date(reserva.data_checkin);
+    const dOut = new Date(reserva.data_checkout);
+    const diffDays = Math.ceil(Math.abs(dOut - dIn) / (1000 * 60 * 60 * 24));
+    document.getElementById('detDias').textContent = diffDays + (diffDays === 1 ? ' noite' : ' noites');
+
+    // 2. Consumos e Totais
+    let consumosHtml = '';
+    let totalConsumo = 0;
+    try {
+      const { data: consData, error } = await supabase.from('consumos').select('*, produtos(nome)').eq('reserva_id', id);
+      if (!error && consData && consData.length > 0) {
+        consData.forEach(c => {
+          totalConsumo += Number(c.valor_total_item);
+          const pName = c.produtos?.nome || 'Produto Indefinido';
+          consumosHtml += `<li style="padding: 0.3rem 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;">
+            <span>${c.quantidade}x ${pName}</span>
+            <span>R$ ${Number(c.valor_total_item).toFixed(2).replace('.',',')}</span>
+          </li>`;
+        });
+      } else {
+        consumosHtml = '<li style="color: var(--text-muted);">Nenhum consumo registrado.</li>';
+      }
+    } catch(e) {
+      consumosHtml = '<li style="color: var(--danger);">Erro ao carregar consumos.</li>';
+    }
+    document.getElementById('detConsumosList').innerHTML = consumosHtml;
+
+    // 3. Financeiro
+    const valorReserva = Number(reserva.valor_total) || 0;
+    const totalGeral = valorReserva + totalConsumo;
+    
+    // Busca pagamentos atrelados ao hóspede
+    const pagamentosHospede = allPagamentos.filter(p => p.hospede_id === reserva.hospede_id && p.status !== 'pendente' && p.metodo_pagamento !== 'pendente');
+    const valorPago = pagamentosHospede.reduce((acc, p) => acc + Number(p.valor), 0);
+    const valorPendente = Math.max(0, totalGeral - valorPago);
+
+    document.getElementById('detValorPago').textContent = formatCurrency(valorPago);
+    document.getElementById('detValorPendente').textContent = formatCurrency(valorPendente);
+    document.getElementById('detValorTotal').textContent = formatCurrency(totalGeral);
+
     detailsModal.classList.add('active');
   }
   
@@ -349,20 +462,58 @@ document.addEventListener('DOMContentLoaded', function() {
   if(searchInput) {
     searchInput.addEventListener('input', function() {
       clearBtn.style.display = this.value ? 'block' : 'none';
-      renderReservasTable(allReservas.filter(r => 
+      const reservasAtivas = allReservas.filter(r => r.status === 'check-in' || r.status === 'pendente');
+      const filteredAtivas = reservasAtivas.filter(r => 
         (r.hospedes?.nome_completo||'').toLowerCase().includes(this.value.toLowerCase()) || 
         r.numero_quarto.includes(this.value)
-      ), guestsTableBody);
+      );
+      renderDashboardTables(filteredAtivas);
     });
   }
 
+  let currentReservasFilter = 'all';
+
   if(searchReservasFull) {
     searchReservasFull.addEventListener('input', function() {
-      renderReservasTable(allReservas.filter(r => 
-        (r.hospedes?.nome_completo||'').toLowerCase().includes(this.value.toLowerCase()) || 
-        r.numero_quarto.includes(this.value)
-      ), reservasFullTableBody);
+      applyReservasFilter();
     });
+  }
+
+  const reservasFilterBtns = document.querySelectorAll('#reservasFilterBtns button');
+  if(reservasFilterBtns.length > 0) {
+    reservasFilterBtns.forEach(btn => {
+      btn.addEventListener('click', function() {
+        reservasFilterBtns.forEach(b => {
+          b.classList.remove('btn-sm-solid');
+          b.classList.add('btn-sm-outline');
+        });
+        this.classList.remove('btn-sm-outline');
+        this.classList.add('btn-sm-solid');
+        
+        currentReservasFilter = this.getAttribute('data-filter');
+        applyReservasFilter();
+      });
+    });
+  }
+
+  function applyReservasFilter() {
+    let filtered = allReservas;
+    if(currentReservasFilter === 'andamento') {
+      filtered = allReservas.filter(r => r.status === 'check-in');
+    } else if(currentReservasFilter === 'proximas') {
+      filtered = allReservas.filter(r => r.status === 'pendente');
+    } else if(currentReservasFilter === 'finalizadas') {
+      filtered = allReservas.filter(r => r.status === 'check-out' || r.status === 'cancelada');
+    }
+    
+    const term = searchReservasFull?.value.toLowerCase() || '';
+    if(term) {
+      filtered = filtered.filter(r => 
+        (r.hospedes?.nome_completo||'').toLowerCase().includes(term) || 
+        r.numero_quarto.includes(term)
+      );
+    }
+    renderReservasTable(filtered, reservasFullTableBody);
   }
 
   if(searchHospedesFull) {
@@ -378,7 +529,8 @@ document.addEventListener('DOMContentLoaded', function() {
     clearBtn.addEventListener('click', function() {
       if(searchInput) searchInput.value = '';
       clearBtn.style.display = 'none';
-      renderReservasTable(allReservas, guestsTableBody);
+      const reservasAtivas = allReservas.filter(r => r.status === 'check-in' || r.status === 'pendente');
+      renderDashboardTables(reservasAtivas);
     });
   }
 
@@ -397,6 +549,8 @@ document.addEventListener('DOMContentLoaded', function() {
   let allReservas = [];
   let allProdutos = [];
   let allPagamentos = [];
+  let allLogsAcesso = [];
+  let allDespesas = [];
   let currentPaymentFilter = 'all';
 
   let metodoChartInstance = null;
@@ -434,7 +588,24 @@ document.addEventListener('DOMContentLoaded', function() {
         const inDate = formatDate(r.data_checkin);
         const outDate = formatDate(r.data_checkout);
         const badgeClass = `badge-${r.status}`;
-        const totalStr = formatCurrency(500); // Mock mantido conforme original
+        
+        // Cálculo dinâmico idêntico ao do momento da reserva
+        const dInDate = new Date(r.data_checkin + "T00:00:00");
+        const dOutDate = new Date(r.data_checkout + "T00:00:00");
+        const diffTime = Math.abs(dOutDate - dInDate);
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const qValue = parseInt(r.numero_quarto);
+        let valorDiaria = 0;
+        if (qValue === 1 || qValue === 2) valorDiaria = 60;
+        else if (qValue === 3 || qValue === 4) valorDiaria = 90;
+        else if (qValue === 5 || qValue === 6) valorDiaria = 100;
+        else if (qValue === 7 || qValue === 8) valorDiaria = 160;
+        else if (qValue === 9 || qValue === 10) valorDiaria = 140;
+        else if (qValue === 11 || qValue === 12) valorDiaria = 210;
+        else valorDiaria = 0;
+        
+        const calcTotal = r.valor_total ? parseFloat(r.valor_total) : (valorDiaria * diffDays);
+        const totalStr = formatCurrency(calcTotal);
 
         let actionBtns = `
           <button class="btn-sm-outline" onclick="openDetailsModal('${r.id}')">Detalhes</button>
@@ -442,6 +613,7 @@ document.addEventListener('DOMContentLoaded', function() {
         if (r.status === 'pendente') {
           actionBtns += `<button class="btn-sm-outline" style="color:#555;border-color:#ccc;margin-left:5px;" onclick="openFnrhModal('${nome}','${cpf}','${telefone}','${r.numero_quarto}','${r.data_checkin}','${r.data_checkout}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg> FNRH</button>`;
           actionBtns += `<button class="btn-sm-solid" style="margin-left:5px;" onclick="doCheckin('${r.id}')">Check-in</button>`;
+          actionBtns += `<button class="btn-sm-outline" style="color:var(--danger);border-color:var(--danger);margin-left:5px;" onclick="doCancel('${r.id}')">Cancelar</button>`;
         } else if (r.status === 'check-in') {
           actionBtns += `<button class="btn-sm-outline" style="color:#555;border-color:#ccc;margin-left:5px;" onclick="openFnrhModal('${nome}','${cpf}','${telefone}','${r.numero_quarto}','${r.data_checkin}','${r.data_checkout}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg> FNRH</button>`;
           actionBtns += `<button class="btn-sm-outline" style="color:var(--primary);border-color:var(--primary);margin-left:5px;" onclick="openConsumoModal('${r.id}', '${nome}', '${r.numero_quarto}')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path></svg> Consumo</button>`;
@@ -472,6 +644,48 @@ document.addEventListener('DOMContentLoaded', function() {
       }).join('');
     }
     tbody.innerHTML = html;
+  }
+
+  function renderDashboardTables(reservas) {
+    const d = new Date();
+    const today = d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
+
+    const checkins = reservas.filter(r => r.status === 'pendente' && r.data_checkin.startsWith(today));
+    const checkouts = reservas.filter(r => r.status === 'check-in' && r.data_checkout.startsWith(today));
+
+    renderSmallTable(checkins, document.getElementById('checkinsTodayBody'));
+    renderSmallTable(checkouts, document.getElementById('checkoutsTodayBody'));
+
+    const footerIn = document.getElementById('checkinsTodayFooter');
+    if(footerIn) footerIn.innerText = `${checkins.length} check-ins aguardados`;
+    
+    const footerOut = document.getElementById('checkoutsTodayFooter');
+    if(footerOut) footerOut.innerText = `${checkouts.length} check-outs programados`;
+  }
+
+  function renderSmallTable(reservas, tbody) {
+    if(!tbody) return;
+    if(reservas.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;padding:2rem;color:var(--text-muted);">Nada programado</td></tr>';
+      return;
+    }
+    tbody.innerHTML = reservas.map(r => {
+      const nome = r.hospedes?.nome_completo || 'Sem Nome';
+      const qValue = r.numero_quarto;
+      
+      let actionBtns = `<button class="btn-sm-outline" onclick="openDetailsModal('${r.id}')">Detalhes</button>`;
+      if (r.status === 'pendente') {
+        actionBtns += `<button class="btn-sm-solid" style="margin-left:5px;" onclick="doCheckin('${r.id}')">Check-in</button>`;
+        actionBtns += `<button class="btn-sm-outline" style="color:var(--danger);border-color:var(--danger);margin-left:5px;" onclick="doCancel('${r.id}')">Cancelar</button>`;
+      } else if (r.status === 'check-in') {
+        actionBtns += `<button class="btn-sm-solid" style="margin-left:5px;" onclick="doCheckout('${r.id}', '${r.hospede_id}')">Check-out</button>`;
+      }
+      return `<tr>
+        <td>${nome}</td>
+        <td><strong>${qValue}</strong></td>
+        <td class="actions">${actionBtns}</td>
+      </tr>`;
+    }).join('');
   }
 
   function renderMapaQuartos(reservas) {
@@ -558,6 +772,12 @@ document.addEventListener('DOMContentLoaded', function() {
     let totalPaid = 0;
     let totalPending = 0;
     let pendingCount = 0;
+    let totalDespesas = 0;
+
+    allDespesas.forEach(d => {
+      // assumindo que as despesas também têm um valor a descontar
+      totalDespesas += Number(d.valor);
+    });
 
     allPagamentos.forEach(p => {
       if (p.metodo_pagamento === 'pendente' || p.status === 'pendente') {
@@ -572,6 +792,22 @@ document.addEventListener('DOMContentLoaded', function() {
     pendingRevenueEl.textContent = `R$ ${totalPending.toFixed(2)}`;
     if (document.getElementById('pendingCount')) {
       document.getElementById('pendingCount').textContent = pendingCount;
+    }
+    
+    // Calcula Lucro/Prejuízo
+    const profitRevenueEl = document.getElementById('profitRevenue');
+    const profitSubtitleEl = document.getElementById('profitSubtitle');
+    if (profitRevenueEl) {
+      const lucro = totalPaid - totalDespesas;
+      profitRevenueEl.textContent = `R$ ${lucro.toFixed(2)}`;
+      
+      if (lucro >= 0) {
+        profitSubtitleEl.textContent = 'Lucro Operacional';
+        profitSubtitleEl.style.color = 'var(--success)';
+      } else {
+        profitSubtitleEl.textContent = 'Prejuízo Operacional';
+        profitSubtitleEl.style.color = 'var(--danger)';
+      }
     }
 
     // DRE Simplificado
@@ -775,9 +1011,19 @@ document.addEventListener('DOMContentLoaded', function() {
       if(payError) throw payError;
       allPagamentos = payData || [];
 
+      // Buscar Despesas
+      const { data: despData, error: despError } = await supabase
+        .from('despesas')
+        .select('*')
+        .order('data_vencimento', { ascending: false });
+      
+      if(despError) throw despError;
+      allDespesas = despData || [];
+
       // Render
-      renderReservasTable(allReservas, document.getElementById('guestsTableBody'));
-      renderReservasTable(allReservas, document.getElementById('reservasFullTableBody'));
+      const reservasAtivas = allReservas.filter(r => r.status === 'check-in' || r.status === 'pendente');
+      renderDashboardTables(reservasAtivas);
+      applyReservasFilter();
       renderHospedesTable(allHospedes, document.getElementById('guestsFullTableBody'));
       renderMapaQuartos(allReservas);
       renderPagamentos();
@@ -785,11 +1031,48 @@ document.addEventListener('DOMContentLoaded', function() {
       
       renderPendencias(allPagamentos, allHospedes);
       fetchActivities(allReservas, allPagamentos);
+      fetchLogsAcesso();
 
     } catch (e) {
       console.error(e);
       showToast('Erro ao carregar dados', 'error');
     }
+  }
+
+  // --- Logs de Acesso ---
+  async function fetchLogsAcesso() {
+    if (!supabase) return;
+    try {
+      const { data, error } = await supabase.from('logs_acesso').select('*').order('data_hora', { ascending: false }).limit(20);
+      if (error) throw error;
+      allLogsAcesso = data || [];
+      renderLogsAcesso(allLogsAcesso);
+    } catch (e) {
+      console.error('Erro ao buscar logs:', e);
+    }
+  }
+
+  function renderLogsAcesso(logs) {
+    if (!logsAcessoTableBody) return;
+    logsAcessoTableBody.innerHTML = '';
+    logs.forEach(log => {
+      const tr = document.createElement('tr');
+      tr.style.borderTop = '1px solid var(--border-color)';
+      
+      const badgeStyle = log.status === 'Sucesso' 
+        ? 'color: #15803d; background-color: #dcfce7;' 
+        : 'color: #b91c1c; background-color: #fee2e2;';
+
+      const dataStr = log.data_hora ? new Date(log.data_hora).toLocaleString('pt-BR') : '';
+
+      tr.innerHTML = `
+        <td style="padding: 12px;"><strong>${log.usuario_email}</strong></td>
+        <td style="padding: 12px;"><span style="display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; ${badgeStyle}">${log.status}</span></td>
+        <td style="padding: 12px; color: var(--text-muted); font-size: 14px;">${log.ip_user_agent || '-'}</td>
+        <td style="padding: 12px; color: var(--text-muted); font-size: 14px;">${dataStr}</td>
+      `;
+      logsAcessoTableBody.appendChild(tr);
+    });
   }
 
   // --- Submits ---
@@ -827,9 +1110,12 @@ document.addEventListener('DOMContentLoaded', function() {
         hospede_id = existHosp.id;
         await supabase.from('hospedes').update({ nome_completo: payloadNome, telefone: payloadTel }).eq('id', hospede_id);
       } else {
+        const insertData = { nome_completo: payloadNome, telefone: payloadTel };
+        if (payloadCpf) insertData.cpf = payloadCpf; // Only add if present
+
         const { data: newHosp, error: errNew } = await supabase
           .from('hospedes')
-          .insert([{ nome_completo: payloadNome, cpf: payloadCpf, telefone: payloadTel }])
+          .insert([insertData])
           .select('id')
           .single();
         if(errNew) throw errNew;
@@ -849,17 +1135,15 @@ document.addEventListener('DOMContentLoaded', function() {
       const diffTime = Math.abs(dOutDate - dInDate);
       const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
       
-      const qValue = parseInt(payloadQuarto);
-      let valorDiaria = 0;
-      if (qValue === 1 || qValue === 2) valorDiaria = 60;
-      else if (qValue === 3 || qValue === 4) valorDiaria = 90;
-      else if (qValue === 5 || qValue === 6) valorDiaria = 100;
-      else if (qValue === 7 || qValue === 8) valorDiaria = 160;
-      else if (qValue === 9 || qValue === 10) valorDiaria = 140;
-      else if (qValue === 11 || qValue === 12) valorDiaria = 210;
-      else valorDiaria = 0;
-
+      const climatizacaoSelect = document.getElementById('climatizacao');
+      const climatizacao = climatizacaoSelect ? climatizacaoSelect.value : 'ventilador';
+      
+      const payloadHospedesQtd = parseInt(document.getElementById('hospedesQuantidade').value) || 1;
+      const valorDiariaBase = (climatizacao === 'ar') ? 90 : 70;
+      const valorDiaria = valorDiariaBase * payloadHospedesQtd;
       const totalReserva = valorDiaria * diffDays;
+      
+      payloadReserva.valor_total = totalReserva;
 
       const { error: errRes } = await supabase.from('reservas').insert([payloadReserva]);
       if (errRes) {
@@ -963,4 +1247,25 @@ document.addEventListener('DOMContentLoaded', function() {
   // Start
   loadProdutos();
   fetchAll();
+
+  // --- LOGOUT LOGIC ---
+  const btnLogout = document.getElementById('btnLogout');
+  if (btnLogout) {
+    btnLogout.addEventListener('click', async () => {
+      if (supabase) {
+        await supabase.auth.signOut();
+        window.location.href = 'index.html';
+      }
+    });
+  }
 });
+
+// Mobile Sidebar Toggle
+window.toggleSidebar = function() {
+  const sidebar = document.querySelector('.sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  if (sidebar && overlay) {
+    sidebar.classList.toggle('open');
+    overlay.classList.toggle('active');
+  }
+};
