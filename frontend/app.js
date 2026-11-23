@@ -24,8 +24,13 @@ document.addEventListener('DOMContentLoaded', function() {
           const user = session.user;
           const loggedName = document.getElementById('loggedUserName');
           const loggedRole = document.getElementById('loggedUserRole');
-          if(loggedName) loggedName.textContent = user.email.split('@')[0];
-          if(loggedRole) loggedRole.textContent = 'Autenticado via Supabase';
+          // Mostra só o primeiro e o segundo nome (do cadastro, ou da parte antes do @ do e-mail)
+          const meta = user.user_metadata || {};
+          const rawName = meta.full_name || meta.name || meta.nome || (user.email || '').split('@')[0];
+          const shortName = String(rawName).split('@')[0].split(/[\s._-]+/).filter(Boolean).slice(0, 2)
+            .map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+          if(loggedName) loggedName.textContent = shortName || 'Usuário';
+          if(loggedRole) loggedRole.textContent = 'Sessão ativa';
 
           // --- IDLE TIMEOUT (30 MINUTOS) ---
           let idleTimer;
@@ -179,8 +184,9 @@ document.addEventListener('DOMContentLoaded', function() {
     return p.length >= 2 ? (p[0][0] + p[1][0]).toUpperCase() : name.substring(0, 2).toUpperCase();
   }
 
+  // Formato único de dinheiro em todo o sistema: R$ 1.234,56
   function formatCurrency(val) {
-    return 'R$ ' + val.toFixed(2).replace('.', ',');
+    return (Number(val) || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }).replace(/\s/g, ' ');
   }
 
   function timeAgo(dateIso) {
@@ -238,9 +244,9 @@ document.addEventListener('DOMContentLoaded', function() {
     const totalDiarias = valorDiaria * diffDays;
     const total = totalDiarias;
     
-    if (calcNightsLabel) calcNightsLabel.textContent = `R$ ${valorDiaria.toFixed(2).replace('.', ',')} x ${diffDays} noites (${numHospedes} hóspede${numHospedes > 1 ? 's' : ''})`;
-    if (calcNightsTotal) calcNightsTotal.textContent = `R$ ${totalDiarias.toFixed(2).replace('.', ',')}`;
-    if (calcGrandTotal) calcGrandTotal.textContent = `R$ ${total.toFixed(2).replace('.', ',')}`;
+    if (calcNightsLabel) calcNightsLabel.textContent = `${formatCurrency(valorDiaria)} x ${diffDays} noites (${numHospedes} hóspede${numHospedes > 1 ? 's' : ''})`;
+    if (calcNightsTotal) calcNightsTotal.textContent = `${formatCurrency(totalDiarias)}`;
+    if (calcGrandTotal) calcGrandTotal.textContent = `${formatCurrency(total)}`;
     
     priceBreakdown.style.display = valorDiaria > 0 ? 'block' : 'none';
   }
@@ -359,7 +365,7 @@ document.addEventListener('DOMContentLoaded', function() {
         valorFinalDescricao = 0;
       }
 
-      showToast(`Check-out concluído! Conta atualizada: R$ ${valorFinalDescricao.toFixed(2)}`);
+      showToast(`Check-out concluído! Conta atualizada: ${formatCurrency(valorFinalDescricao)}`);
       fetchAll(); // Isso fará a tabela e o mapa de ocupação atualizarem
     } catch(e) {
       console.error(e);
@@ -406,7 +412,7 @@ document.addEventListener('DOMContentLoaded', function() {
           const pName = c.produtos?.nome || 'Produto Indefinido';
           consumosHtml += `<li style="padding: 0.3rem 0; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between;">
             <span>${c.quantidade}x ${pName}</span>
-            <span>R$ ${Number(c.valor_total_item).toFixed(2).replace('.',',')}</span>
+            <span>${formatCurrency(Number(c.valor_total_item))}</span>
           </li>`;
         });
       } else {
@@ -557,7 +563,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       if(consumoProdutoId) {
         consumoProdutoId.innerHTML = '<option value="">Selecione um produto...</option>' + 
-          allProdutos.map(p => `<option value="${p.id}" data-preco="${p.preco_venda}">${p.nome} - R$ ${p.preco_venda.toFixed(2)}</option>`).join('');
+          allProdutos.map(p => `<option value="${p.id}" data-preco="${p.preco_venda}">${p.nome} - ${formatCurrency(p.preco_venda)}</option>`).join('');
       }
     } catch(e) {
       console.error('Erro ao carregar produtos', e);
@@ -735,9 +741,9 @@ document.addEventListener('DOMContentLoaded', function() {
     tbody.innerHTML = filtered.map(p => {
       const dataStr = new Date(p.data_pagamento).toLocaleString('pt-BR');
       const nome = p.hospedes?.nome_completo || 'Desconhecido';
-      const valor = `R$ ${Number(p.valor).toFixed(2)}`;
+      const valor = `${formatCurrency(Number(p.valor))}`;
       const isPendente = p.metodo_pagamento === 'pendente' || p.status === 'pendente';
-      const statusBadge = isPendente ? '<span class="badge badge-pendente">PENDENTE</span>' : '<span class="badge badge-check-out">PAGO</span>';
+      const statusBadge = isPendente ? '<span class="badge badge-pendente">PENDENTE</span>' : '<span class="badge badge-pago">PAGO</span>';
       
       let methodStr = isPendente ? '-' : (p.metodo_pagamento || 'N/A').toUpperCase();
       let actionBtn = isPendente ? `<button class="btn-sm-solid" onclick="openPayModal('${p.hospede_id}', '${nome}', '')">Receber</button>` : '';
@@ -780,10 +786,12 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
 
-    totalRevenueEl.textContent = `R$ ${totalPaid.toFixed(2)}`;
-    pendingRevenueEl.textContent = `R$ ${totalPending.toFixed(2)}`;
+    totalRevenueEl.textContent = `${formatCurrency(totalPaid)}`;
+    pendingRevenueEl.textContent = `${formatCurrency(totalPending)}`;
     if (document.getElementById('pendingCount')) {
       document.getElementById('pendingCount').textContent = pendingCount;
+      const pendingLabel = document.getElementById('pendingLabel');
+      if (pendingLabel) pendingLabel.textContent = pendingCount === 1 ? 'pendência' : 'pendências';
     }
     
     // Calcula Lucro/Prejuízo
@@ -791,7 +799,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const profitSubtitleEl = document.getElementById('profitSubtitle');
     if (profitRevenueEl) {
       const lucro = totalPaid - totalDespesas;
-      profitRevenueEl.textContent = `R$ ${lucro.toFixed(2)}`;
+      profitRevenueEl.textContent = `${formatCurrency(lucro)}`;
       
       if (lucro >= 0) {
         profitSubtitleEl.textContent = 'Lucro Operacional';
@@ -833,13 +841,17 @@ document.addEventListener('DOMContentLoaded', function() {
           labels: ['Pago', 'Pendente'],
           datasets: [{
             data: [totalPaid, totalPending],
-            backgroundColor: ['#27ae60', '#f39c12'],
-            borderWidth: 0
+            backgroundColor: ['#047857', '#d97706'],
+            borderWidth: 2,
+            borderColor: '#ffffff'
           }]
         },
         options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '62%',
           plugins: {
-            legend: { labels: { color: '#fff' } }
+            legend: { position: 'bottom', labels: { color: '#475569', usePointStyle: true, padding: 16, font: { family: 'Outfit' } } }
           }
         }
       });
@@ -866,17 +878,20 @@ document.addEventListener('DOMContentLoaded', function() {
           datasets: [{
             label: 'Faturamento',
             data: data,
-            backgroundColor: '#00d2ff',
-            borderRadius: 4
+            backgroundColor: '#1e3a8a',
+            borderRadius: 6,
+            maxBarThickness: 56
           }]
         },
         options: {
+          responsive: true,
+          maintainAspectRatio: false,
           plugins: {
             legend: { display: false }
           },
           scales: {
-            y: { ticks: { color: '#ccc' }, grid: { color: '#333' } },
-            x: { ticks: { color: '#ccc' }, grid: { display: false } }
+            y: { beginAtZero: true, ticks: { color: '#64748b', font: { family: 'Outfit' } }, grid: { color: '#e2e8f0' }, border: { display: false } },
+            x: { ticks: { color: '#475569', font: { family: 'Outfit' } }, grid: { display: false } }
           }
         }
       });
@@ -1215,7 +1230,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (err) throw err;
 
-        showToast(`Consumo lançado com sucesso! Total: R$ ${total.toFixed(2)}`);
+        showToast(`Consumo lançado com sucesso! Total: ${formatCurrency(total)}`);
         closeConsumoModal();
       } catch (e) {
         showToast(e.message, 'error');

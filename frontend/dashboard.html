@@ -40,7 +40,7 @@
       }
     }
   </style>
-  <link rel="stylesheet" href="styles.css?v=21">
+  <link rel="stylesheet" href="styles.css?v=27">
   <link rel="stylesheet" href="config-ui.css?v=1">
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -48,9 +48,9 @@
 <body>
   <!-- Sidebar -->
   <aside class="sidebar">
-    <div class="logo" style="flex-direction: column; align-items: center; text-align: center; gap: 8px; margin-bottom: 1rem;">
+    <div class="logo">
       <!-- Sugiro que você salve a imagem que enviou como 'logo.png' dentro da pasta frontend -->
-      <img src="logo.png" alt="Pousada da Nita" style="max-width: 100%; height: auto; max-height: 80px; object-fit: contain;">
+      <img src="logo.png" alt="Pousada da Nita">
     </div>
 
     <nav class="nav-links">
@@ -80,8 +80,8 @@
       </a>
     </nav>
 
-    <div class="sidebar-footer" style="display: flex; flex-direction: column; gap: 10px;">
-      <div style="display: flex; align-items: center; gap: 12px;">
+    <div class="sidebar-footer">
+      <div class="user-row">
         <div class="user-avatar">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
         </div>
@@ -90,7 +90,10 @@
           <span id="loggedUserRole">Carregando...</span>
         </div>
       </div>
-      <button id="btnLogout" class="btn-sm-outline" style="width: 100%; border-color: var(--danger); color: var(--danger);" title="Encerra a sessão atual com segurança">Sair do Sistema</button>
+      <button id="btnLogout" class="btn-logout" type="button" title="Encerra a sessão atual com segurança">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        Sair do sistema
+      </button>
     </div>
   </aside>
 
@@ -146,7 +149,7 @@
           <div class="metric-info">
             <h3>Pagamentos Pendentes</h3>
             <p id="pendingRevenue">R$ 0,00</p>
-            <span class="metric-subtitle pending"><span id="pendingCount">0</span> pendências</span>
+            <span class="metric-subtitle pending"><span id="pendingCount">0</span> <span id="pendingLabel">pendências</span></span>
           </div>
           <div class="metric-icon amber">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2" ry="2"></rect><line x1="2" y1="10" x2="22" y2="10"></line></svg>
@@ -166,10 +169,10 @@
             </div>
           </div>
           
-          <div class="content-split" style="gap: 1.5rem; margin-top: 1.5rem;">
+          <div class="content-split subtables">
             <!-- Check-ins de Hoje -->
-            <div class="table-card" style="flex: 1;">
-              <h3 style="padding: 1.5rem 1.5rem 0; color: var(--text-color);">🛬 Check-ins de Hoje</h3>
+            <div class="table-card subtable">
+              <h3 class="subtable-title"><svg class="h3-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg> Check-ins de Hoje</h3>
               <table>
                 <thead>
                   <tr>
@@ -182,14 +185,14 @@
                   <!-- Render via JS -->
                 </tbody>
               </table>
-              <div class="table-footer" id="checkinsTodayFooter" style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem;">
+              <div class="table-footer subtable-footer" id="checkinsTodayFooter">
                 0 check-ins aguardados
               </div>
             </div>
 
             <!-- Check-outs de Hoje -->
-            <div class="table-card" style="flex: 1;">
-              <h3 style="padding: 1.5rem 1.5rem 0; color: var(--text-color);">🛫 Check-outs de Hoje</h3>
+            <div class="table-card subtable">
+              <h3 class="subtable-title"><svg class="h3-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg> Check-outs de Hoje</h3>
               <table>
                 <thead>
                   <tr>
@@ -202,7 +205,7 @@
                   <!-- Render via JS -->
                 </tbody>
               </table>
-              <div class="table-footer" id="checkoutsTodayFooter" style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 1rem;">
+              <div class="table-footer subtable-footer" id="checkoutsTodayFooter">
                 0 check-outs programados
               </div>
             </div>
@@ -353,7 +356,7 @@
           Relatórios Gerenciais
         </div>
       </header>
-      <div class="metrics-grid">
+      <div class="metrics-grid metrics-grid--dre">
         <div class="metric-card">
           <div class="metric-info">
             <h3>Receita Total</h3>
@@ -393,14 +396,14 @@
           </div>
         </div>
       </div>
-      <div class="content-split" style="margin-top: 1.5rem; gap: 1.5rem;">
-        <div class="table-card" style="flex: 2; padding: 1.5rem;">
-          <h3 style="margin-bottom: 1rem; color: #fff;">Faturamento por Método de Pagamento</h3>
-          <canvas id="metodoPagamentoChart"></canvas>
+      <div class="content-split charts-row">
+        <div class="table-card chart-card chart-card--wide">
+          <h3>Faturamento por Método de Pagamento</h3>
+          <div class="chart-box"><canvas id="metodoPagamentoChart"></canvas></div>
         </div>
-        <div class="table-card" style="flex: 1; padding: 1.5rem;">
-          <h3 style="margin-bottom: 1rem; color: #fff;">Receita Pendente vs Paga</h3>
-          <canvas id="statusPagamentoChart"></canvas>
+        <div class="table-card chart-card">
+          <h3>Receita Pendente vs Paga</h3>
+          <div class="chart-box"><canvas id="statusPagamentoChart"></canvas></div>
         </div>
       </div>
     </section>
@@ -420,13 +423,13 @@
       <div class="settings-main" style="width: 100%; display: flex; flex-direction: column; gap: 1.5rem;">
         
         <!-- Manual do Usuário -->
-        <div class="settings-card" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 4rem 2rem; background: rgba(255,255,255,0.02);">
+        <div class="settings-card" style="display: flex; flex-direction: column; align-items: center; text-align: center; padding: 3rem 2rem;">
           <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color: var(--primary); margin-bottom: 1.5rem;"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
           <h3 style="margin-bottom: 1rem; font-size: 1.8rem; color: var(--text-color);">Manual do Usuário Interativo</h3>
           <p class="settings-desc" style="max-width: 600px; margin-bottom: 2.5rem; font-size: 1.05rem; line-height: 1.6;">
             Aprenda a operar a Pousada da Nita no dia a dia. Preparamos histórias reais de navegação para você entender o passo a passo do check-in, lançamento de frigobar e check-out de maneira simples.
           </p>
-          <a href="manual.html" target="_blank" class="btn-primary" style="text-decoration: none; padding: 1.2rem 2.5rem; font-size: 1.1rem; border-radius: 8px; font-weight: 600; display: inline-flex; align-items: center; gap: 10px; box-shadow: 0 4px 15px rgba(0, 198, 255, 0.3);">
+          <a href="manual.html" target="_blank" class="btn-primary" style="text-decoration: none; padding: 1.2rem 2.5rem; font-size: 1.1rem; border-radius: var(--radius-sm); font-weight: 600; display: inline-flex; align-items: center; gap: 10px;">
             Abrir Manual Completo
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><polyline points="15 3 21 3 21 9"></polyline><line x1="10" y1="14" x2="21" y2="3"></line></svg>
           </a>
@@ -786,6 +789,6 @@
 
   <div class="toast-container" id="toastContainer"></div>
 
-  <script src="app.js?v=22"></script>
+  <script src="app.js?v=23"></script>
 </body>
 </html>

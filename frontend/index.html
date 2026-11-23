@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login - Pousada da Nita</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css?v=21">
+  <link rel="stylesheet" href="styles.css?v=35">
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
   <style>
     /* O styles.css prepara o body para o layout do app (sidebar + conteúdo); aqui ele é uma tela única centralizada. */
@@ -18,15 +18,17 @@
       min-height: 100dvh;
       overflow: auto;
       padding: 1.5rem;
-      background: var(--sidebar-bg-gradient);
+      background: #061620;
     }
 
     .login-container {
       background-color: var(--bg-card);
       border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
+      border: 1px solid #e6ecf3;
+      border-radius: 24px;
+      box-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 12px 40px rgba(30,58,100,0.08);
       width: 100%;
-      max-width: 400px;
+      max-width: 480px;
       overflow: hidden;
       animation: login-in 0.5s var(--ease-out) both;
     }
@@ -37,29 +39,21 @@
     }
 
     /* A faixa tem a mesma cor de fundo do logo (#0b212e), então o logo se funde com ela */
-    .login-brand {
-      background-color: #0b212e;
-      display: flex;
-      justify-content: center;
-      padding: 1.25rem 1.5rem 0.5rem;
-    }
-    .login-logo {
-      display: block;
-      width: 100%;
-      max-width: 220px;
-      height: auto;
-    }
 
+
+    
     .login-body {
-      padding: 2rem 2.25rem 2.25rem;
+      padding: 2.25rem 3rem 2.5rem;
+      text-align: center;
     }
 
     .login-body h1 {
-      font-size: 1.35rem;
+      font-size: 1.6rem;
       font-weight: 600;
       color: var(--text-main);
       margin-bottom: 0.25rem;
     }
+    .login-form { text-align: left; }
     .login-lead {
       font-size: 0.9rem;
       color: var(--text-muted);
@@ -80,12 +74,12 @@
 
     .btn-login {
       width: 100%;
-      min-height: 48px;
+      min-height: 52px;
       padding: 0.875rem;
       background-color: var(--primary);
       color: #fff;
       border: none;
-      border-radius: var(--radius-sm);
+      border-radius: 12px;
       font-weight: 600;
       font-size: 1rem;
       margin-top: 0.5rem;
@@ -99,6 +93,63 @@
       text-align: center;
     }
 
+
+    /* Fundo claro com orbes suaves à deriva (só transform anima) */
+    .bg-art { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
+    .bg-art .orb { position: absolute; border-radius: 50%; will-change: transform; }
+    .bg-art .o1 { width: 620px; height: 620px; left: -160px; top: -200px; background: radial-gradient(circle, rgba(37,99,235,0.30), rgba(37,99,235,0) 68%); animation: drift-a 26s cubic-bezier(0.45,0,0.55,1) infinite alternate; }
+    .bg-art .o2 { width: 560px; height: 560px; right: -140px; bottom: -180px; background: radial-gradient(circle, rgba(20,184,166,0.20), rgba(20,184,166,0) 68%); animation: drift-b 32s cubic-bezier(0.45,0,0.55,1) infinite alternate; }
+    .bg-art .o3 { width: 440px; height: 440px; right: 12%; top: -140px; background: radial-gradient(circle, rgba(56,189,248,0.16), rgba(56,189,248,0) 68%); animation: drift-c 29s cubic-bezier(0.45,0,0.55,1) infinite alternate; }
+    .bg-art .o4 { width: 380px; height: 380px; left: 8%; bottom: -120px; background: radial-gradient(circle, rgba(79,70,229,0.20), rgba(79,70,229,0) 68%); animation: drift-a 35s cubic-bezier(0.45,0,0.55,1) infinite alternate-reverse; }
+    .bg-art .dots { position: absolute; inset: 0; background-image: radial-gradient(rgba(148,197,255,0.14) 1px, transparent 1.2px); background-size: 26px 26px;
+      -webkit-mask-image: radial-gradient(ellipse 60% 55% at 50% 50%, #000 0%, transparent 78%); mask-image: radial-gradient(ellipse 60% 55% at 50% 50%, #000 0%, transparent 78%); }
+    @keyframes drift-a { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(90px,60px,0) scale(1.12); } }
+    @keyframes drift-b { from { transform: translate3d(0,0,0) scale(1.05); } to { transform: translate3d(-80px,-70px,0) scale(0.95); } }
+    @keyframes drift-c { from { transform: translate3d(0,0,0); } to { transform: translate3d(-60px,80px,0) scale(1.1); } }
+    @media (prefers-reduced-motion: reduce) { .bg-art .orb { animation: none; } }
+
+    /* Cartão escuro, igual à barra lateral do dashboard: o logo (fundo #0b212e) se funde ao cartão, sem caixa */
+        .login-wrap { position: relative; z-index: 1; width: 100%; max-width: 502px; padding: 7px; background: rgba(255,255,255,0.04); border: 1px solid rgba(148,197,255,0.12); border-radius: 32px; box-shadow: 0 30px 80px rgba(0,0,0,0.45); }
+    .login-wrap .login-container { background-color: #0b212e; max-width: none; border-radius: 25px; border: 1px solid rgba(255,255,255,0.06); box-shadow: none; }
+    .login-brand { display: flex; justify-content: center; padding: 2rem 2rem 0; }
+    .login-logo { display: block; width: 100%; max-width: 300px; height: auto; }
+    .login-body h1 { color: #f8fafc; }
+    .login-lead { color: #a8b5c7; }
+    .login-form label { color: #cbd5e1; }
+    .login-help { color: #a8b5c7; }
+    .login-error { background-color: rgba(239,68,68,0.12); color: #fecaca; border-color: rgba(252,165,165,0.35); }
+    .btn-login { background-color: #2f6fe4; }
+    .btn-login:hover:not(:disabled) { background-color: #4a85f0; }
+
+
+    /* Campos: escuros e translúcidos, com ícone, anel de foco e botão de mostrar senha */
+    .login-form .form-group { margin-bottom: 1.1rem; }
+    .login-form label { display: block; margin-bottom: 0.45rem; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.02em; color: #b6c4d6; }
+    .field { position: relative; }
+    .field > svg.lead-ico { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #7f93aa; pointer-events: none; transition: color 0.2s ease; }
+    .login-form .field input {
+      width: 100%; height: 50px; padding: 0 14px 0 44px; font: inherit; font-size: 0.95rem; color: #f1f5f9;
+      background: rgba(255,255,255,0.05); border: 1px solid rgba(148,197,255,0.18); border-radius: 12px;
+      transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+    }
+    .login-form .field input::placeholder { color: #6f8399; opacity: 1; }
+    .login-form .field input:hover { border-color: rgba(148,197,255,0.32); }
+    .login-form .field input:focus { outline: none; background: rgba(255,255,255,0.08); border-color: #5b9dff; box-shadow: 0 0 0 4px rgba(91,157,255,0.20); }
+    .field:focus-within > svg.lead-ico { color: #8db8ff; }
+    .login-form .field input:-webkit-autofill { -webkit-text-fill-color: #f1f5f9; box-shadow: 0 0 0 100px #12303f inset; caret-color: #f1f5f9; }
+    .field.has-toggle input { padding-right: 48px; }
+    .toggle-pass { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 38px; height: 38px; display: grid; place-items: center; background: transparent; border: 0; border-radius: 9px; color: #7f93aa; cursor: pointer; transition: background 0.2s ease, color 0.2s ease; }
+    .toggle-pass:hover { background: rgba(255,255,255,0.08); color: #dbe7f5; }
+    .toggle-pass:focus-visible { outline: 2px solid #8db8ff; outline-offset: 1px; }
+    .toggle-pass .eye-off { display: none; }
+    .toggle-pass[aria-pressed="true"] .eye { display: none; }
+    .toggle-pass[aria-pressed="true"] .eye-off { display: block; }
+    .btn-login { display: flex; align-items: center; justify-content: center; gap: 0.5rem; border-radius: 12px; background: linear-gradient(180deg, #3b82f6 0%, #2563eb 100%); box-shadow: 0 8px 20px rgba(37,99,235,0.35), inset 0 1px 0 rgba(255,255,255,0.22); transition: transform 0.2s cubic-bezier(0.32,0.72,0,1), box-shadow 0.2s ease, filter 0.2s ease; }
+    .btn-login:hover:not(:disabled) { background: linear-gradient(180deg, #4b8df8 0%, #2f6df0 100%); filter: none; }
+    .btn-login:active:not(:disabled) { transform: scale(0.985); }
+    .btn-login svg { transition: transform 0.25s cubic-bezier(0.32,0.72,0,1); }
+    .btn-login:hover:not(:disabled) svg { transform: translateX(3px); }
+
     @media (max-width: 420px) {
       .login-body { padding: 1.5rem 1.25rem 1.75rem; }
     }
@@ -106,33 +157,49 @@
 </head>
 <body>
 
+  <div class="bg-art" aria-hidden="true"><span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span><span class="orb o4"></span><span class="dots"></span></div>
+
+  <div class="login-wrap">
   <div class="login-container">
     <div class="login-brand">
       <img src="logo.png" alt="Pousada da Nita" class="login-logo" width="652" height="441" onerror="this.style.display='none'">
     </div>
-
     <div class="login-body">
-      <h1>Acesso ao sistema</h1>
+      <h1>Bem-vindo</h1>
       <p class="login-lead">Entre com o seu e-mail e a sua senha.</p>
 
       <div id="loginError" class="login-error" role="alert" aria-live="assertive">Credenciais inválidas.</div>
 
-      <form id="loginForm">
+      <form id="loginForm" class="login-form">
         <div class="form-group">
           <label for="email">E-mail</label>
-          <input type="email" id="email" name="email" required autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="voce@exemplo.com">
+          <div class="field"><svg class="lead-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="3"></rect><path d="m3.5 7 8.5 6 8.5-6"></path></svg><input type="email" id="email" name="email" required autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="voce@exemplo.com"></div>
         </div>
         <div class="form-group">
           <label for="password">Senha</label>
-          <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Digite sua senha">
+          <div class="field has-toggle"><svg class="lead-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10" rx="3"></rect><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"></path></svg><input type="password" id="password" name="password" required autocomplete="current-password" placeholder="Digite sua senha"><button type="button" class="toggle-pass" id="togglePass" aria-label="Mostrar senha" aria-pressed="false"><svg class="eye" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg><svg class="eye-off" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"></path><path d="M10.6 5.1A10.6 10.6 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.5 6.6A17 17 0 0 0 2 12s3.6 7 10 7c1.6 0 3-.4 4.3-1"></path><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"></path></svg></button></div>
         </div>
-        <button type="submit" class="btn-login" id="loginBtn">Entrar</button>
+        <button type="submit" class="btn-login" id="loginBtn">Entrar <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m13 6 6 6-6 6"></path></svg></button>
       </form>
 
-      <p class="login-help" id="recoverLink">Esqueceu a senha? Fale com o administrador do sistema.</p>
+      <p class="login-help" id="recoverLink">Esqueceu a senha? Fale com o administrador.</p>
     </div>
   </div>
+  </div>
 
+  <script>
+    // Mostrar/ocultar senha
+    (function () {
+      var b = document.getElementById('togglePass'), i = document.getElementById('password');
+      if (!b || !i) return;
+      b.addEventListener('click', function () {
+        var show = i.type === 'password';
+        i.type = show ? 'text' : 'password';
+        b.setAttribute('aria-pressed', show ? 'true' : 'false');
+        b.setAttribute('aria-label', show ? 'Ocultar senha' : 'Mostrar senha');
+      });
+    })();
+  </script>
   <script src="login.js"></script>
 </body>
 </html>
