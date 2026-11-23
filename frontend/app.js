@@ -119,16 +119,11 @@ document.addEventListener('DOMContentLoaded', function() {
   const sidebar = document.querySelector('.sidebar');
   const sidebarOverlay = document.getElementById('sidebarOverlay');
 
-  window.toggleSidebar = function() {
-    if(sidebar) sidebar.classList.toggle('show');
-    if(sidebarOverlay) sidebarOverlay.classList.toggle('show');
-  };
-
-  if(sidebarOverlay) {
-    sidebarOverlay.addEventListener('click', function() {
-      sidebar.classList.remove('show');
-      sidebarOverlay.classList.remove('show');
-    });
+  // toggleSidebar (abre/fecha o menu mobile) é definida no final do arquivo.
+  // O overlay já chama toggleSidebar() pelo onclick do HTML.
+  function closeSidebar() {
+    if (sidebar) sidebar.classList.remove('open');
+    if (sidebarOverlay) sidebarOverlay.classList.remove('active');
   }
 
   navItems.forEach(item => {
@@ -144,10 +139,7 @@ document.addEventListener('DOMContentLoaded', function() {
       document.getElementById(targetId).classList.add('active');
       
       // Fecha a sidebar no mobile ao trocar de página
-      if(window.innerWidth <= 768 && sidebar) {
-        sidebar.classList.remove('show');
-        if(sidebarOverlay) sidebarOverlay.classList.remove('show');
-      }
+      if (window.innerWidth <= 768) closeSidebar();
     });
   });
 

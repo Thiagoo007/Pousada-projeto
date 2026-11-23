@@ -5,16 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Manual do Usuário - Pousada da Nita</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="styles.css?v=21">
   <style>
-    body { padding: 3rem 1rem; background: var(--bg-body); color: var(--text-color); max-width: 800px; margin: auto; font-family: 'Outfit', sans-serif; }
+    /* O styles.css prepara o body para o layout do app; o manual é uma página de leitura com rolagem normal. */
+    body { display: block; height: auto; min-height: 100vh; overflow: auto; padding: 3rem 1rem; background: var(--bg-body); color: var(--text-color); max-width: 800px; margin: auto; font-family: 'Outfit', sans-serif; }
     h1 { color: var(--primary); text-align: center; margin-bottom: 0.5rem; }
-    .story-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
-    .story-card h3 { color: var(--secondary); margin-top: 0; display: flex; align-items: center; gap: 10px; font-size: 1.3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+    .story-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-md); }
+    .story-card h3 { color: var(--text-main); margin-top: 0; display: flex; align-items: center; gap: 10px; font-size: 1.25rem; line-height: 1.3; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem; }
+    .story-card h3 svg { flex-shrink: 0; color: var(--primary); }
     .step { display: flex; gap: 1.2rem; margin-top: 1.2rem; }
-    .step-number { background: var(--primary); color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0; box-shadow: 0 0 10px var(--primary); }
-    .step-text { line-height: 1.6; color: var(--text-muted); font-size: 1.05rem; }
+    .step-number { background: var(--primary); color: #fff; width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 0.85rem; flex-shrink: 0; }
+    .step-text { line-height: 1.65; color: #475569; font-size: 1.05rem; max-width: 68ch; }
     .step-text strong { color: var(--text-color); font-weight: 600; }
+    @media (max-width: 600px) { .story-card { padding: 1.25rem; } .step { gap: 0.9rem; } .step-text { font-size: 1rem; } }
   </style>
 </head>
 <body>
@@ -55,7 +58,7 @@
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 
       Cenário 2: Consumo Extra (Frigobar)
     </h3>
-    <p style="color: var(--warning); font-style: italic; margin-bottom: 1.5rem;">"O hóspede do Quarto 1 desce à recepção e pede uma Água com Gás."</p>
+    <p style="color: var(--warning-text); font-style: italic; margin-bottom: 1.5rem;">"O hóspede do Quarto 1 desce à recepção e pede uma Água com Gás."</p>
     
     <div class="step">
       <div class="step-number">1</div>
