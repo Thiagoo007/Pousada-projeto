@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const SUPABASE_URL = "https://ukfdsvtjprpttrkpspzm.supabase.co";
-  const SUPABASE_KEY = "sb_publishable_GNOcox9b0CKVlJ-mDvs6pg_5GXl1qsB";
+  const SUPABASE_URL = "https://gfrphuampkdkrrnkgfak.supabase.co";
+  const SUPABASE_KEY = "sb_publishable_tOMLcUz5Qm_Dn3NtZ-zsYw_DrgpYlhJ";
 
   let supabase = null;
   if (window.supabase && window.supabase.createClient) {
